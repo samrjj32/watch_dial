@@ -2,14 +2,18 @@
  * Catalog for the JellyLab Casio Royale builder.
  *
  * Ported from the original storefront modules (jellylab-catalog, -decals,
- * -text-removal). Prices are USD cents. Window paths, decal
+ * -text-removal). Prices are whole Indian rupees. Window paths, decal
  * registration and text-removal bounds are the production values: they are
  * registered against the 1033 x 1470 photograph and must not be "tidied".
  */
 
-export const BASE_PRICE = 14_500;
-export const US_FREE_SHIPPING_THRESHOLD = 15_000;
-export const TEXT_REMOVAL_PRICE = 2_500;
+/* Every price in this file is whole Indian rupees. */
+
+/** Each coloured window, charged per window. */
+export const WINDOW_COLOUR_PRICE = 500;
+/** One colour across all four windows, instead of 4 x WINDOW_COLOUR_PRICE. */
+export const ALL_WINDOWS_PRICE = 1_000;
+export const TEXT_REMOVAL_PRICE = 1_500;
 
 /* ------------------------------------------------------------------ */
 /* Photograph geometry                                                 */
@@ -46,16 +50,26 @@ export interface Option {
   color?: string | null;
 }
 
+export interface WatchModel extends Option {
+  /** Casio's model number, which is how these are listed and stocked. */
+  model: string;
+}
+
 /**
- * The three stock watches. Each is sold as a complete watch — case and band
- * together — so the case carries the whole watch's price and its band is not
- * a separate choice.
+ * The three stock watches. Each is sold complete — case and band together — so
+ * its price is the whole watch and the band is not a separate choice.
  */
-export const CASES: Option[] = [
-  { id: 'resin-black', name: 'Black', description: 'Black rubber strap · included', price: 0, swatch: 'linear-gradient(135deg,#515252,#121314)' },
-  { id: 'resin-silver', name: 'Silver', description: 'Steel bracelet · +$40', price: 4_000, swatch: 'linear-gradient(130deg,#f1f2f2,#a0a5a8)' },
-  { id: 'resin-gold', name: 'Gold', description: 'Brown leather strap · +$35', price: 3_500, swatch: 'linear-gradient(135deg,#b5a080,#80694b)' },
+export const CASES: WatchModel[] = [
+  { id: 'resin-black', model: 'AE-1200WH-1AV', name: 'Black', price: 2_995, swatch: 'linear-gradient(135deg,#515252,#121314)' },
+  { id: 'resin-silver', model: 'AE-1200WHD-1AV', name: 'Silver', price: 3_995, swatch: 'linear-gradient(130deg,#f1f2f2,#a0a5a8)' },
+  { id: 'resin-gold', model: 'AE-1200WHL-5AV', name: 'Brown', price: 4_495, swatch: 'linear-gradient(135deg,#b5a080,#80694b)' },
 ];
+
+/** "AE-1200WHD-1AV · Silver", the way a watch is named outside its own card. */
+export const modelName = (caseId: string) => {
+  const watch = byId(CASES, caseId) ?? CASES[0];
+  return `${watch.model} · ${watch.name}`;
+};
 
 /** Band artwork and names. The price lives on the case that ships it. */
 export const BANDS: Option[] = [
@@ -321,15 +335,15 @@ export function gradientWindowBounds(build: Build, index: number): [number, numb
 }
 
 /* ------------------------------------------------------------------ */
-/* Money, pricing and shipping                                         */
+/* Money and pricing                                                   */
 /* ------------------------------------------------------------------ */
 
-export function money(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
+export function money(rupees: number): string {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: cents % 100 ? 2 : 0,
-  }).format(cents / 100);
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(rupees);
 }
 
 export interface Upgrade {
@@ -339,52 +353,63 @@ export interface Upgrade {
 }
 
 export interface Pricing {
-  currency: 'USD';
+  currency: 'INR';
+  /** The watch itself. */
   base: number;
+  baseName: string;
   upgrades: Upgrade[];
   total: number;
 }
 
+export interface WindowCharge {
+  /** How many apertures carry a colour. */
+  count: number;
+  /** True when one colour covers all four, which is charged as a set. */
+  uniform: boolean;
+  price: number;
+}
+
+/**
+ * Colouring windows is charged per window, except that one colour across all
+ * four is a set price — so filling every aperture the same way costs less than
+ * colouring them one at a time. A decal is included and never charged.
+ */
+export function windowCharge(build: Build): WindowCharge {
+  const coloured = build.windows.filter((id) => id !== 'none');
+  const uniform =
+    coloured.length === WINDOWS.length && coloured.every((id) => id === coloured[0]);
+  return {
+    count: coloured.length,
+    uniform,
+    price: uniform ? ALL_WINDOWS_PRICE : coloured.length * WINDOW_COLOUR_PRICE,
+  };
+}
+
 export function priceBuild(input: Partial<Build>): Pricing {
   const build = normalizeBuild(input);
-  const upgrades: Upgrade[] = [byId(CASES, build.case)!]
-    .filter((option) => (option.price ?? 0) > 0)
-    .map((option) => ({
-      id: option.id,
-      // The band is part of the watch, so the line item names both.
-      name: `${option.name} case on ${byId(BANDS, stockBandFor(option.id))!.name.toLowerCase()}`,
-      price: option.price!,
-    }));
+  const watch = byId(CASES, build.case)!;
+  const upgrades: Upgrade[] = [];
+
+  const windows = windowCharge(build);
+  if (windows.price > 0)
+    upgrades.push({
+      id: 'window-colour',
+      name: windows.uniform
+        ? 'All four windows, one colour'
+        : `Window colour × ${windows.count}`,
+      price: windows.price,
+    });
 
   if (build.textRemovals.length)
     upgrades.push({ id: 'text-removal', name: 'Text removal', price: TEXT_REMOVAL_PRICE });
 
   return {
-    currency: 'USD',
-    base: BASE_PRICE,
+    currency: 'INR',
+    base: watch.price!,
+    baseName: modelName(watch.id),
     upgrades,
-    total: BASE_PRICE + upgrades.reduce((sum, option) => sum + option.price, 0),
+    total: watch.price! + upgrades.reduce((sum, option) => sum + option.price, 0),
   };
-}
-
-export interface ShippingStatus {
-  unlocked: boolean;
-  headline: string;
-  detail: string;
-  label: string;
-}
-
-export function usShippingStatus(total: number): ShippingStatus {
-  const detail = 'Free US shipping';
-  const remaining = Math.max(0, US_FREE_SHIPPING_THRESHOLD - total);
-  return remaining === 0
-    ? { unlocked: true, headline: 'Unlocked ✓', detail, label: 'Free US shipping unlocked.' }
-    : {
-        unlocked: false,
-        headline: money(remaining) + ' to unlock',
-        detail,
-        label: `Add ${money(remaining)} to unlock free US shipping at $150.`,
-      };
 }
 
 /* ------------------------------------------------------------------ */
@@ -394,7 +419,7 @@ export function usShippingStatus(total: number): ShippingStatus {
 export function buildProperties(input: Partial<Build>): Record<string, string> {
   const b = normalizeBuild(input);
   return {
-    Case: byId(CASES, b.case)!.name,
+    Model: modelName(b.case),
     Band: byId(BANDS, b.band)!.name,
     ...Object.fromEntries(
       WINDOWS.map((w, i) => [

@@ -17,17 +17,20 @@ inside a host that provides those.
   the circle decal clipped to the aperture. Every aperture path and the decal
   placement (centre 393 × 558.5, 164 px) come from the source, so the hotspots line
   up with the artwork exactly.
-- **Step 1 · Case** — the three stock watches, each sold complete with the band it
-  ships on: black on rubber (included), silver on the steel bracelet (+$40), gold on
-  brown leather (+$35). The band is not a separate choice — `normalizeBuild` derives
-  it from the case, so no stored build or link can separate the two.
+- **Step 1 · Model** — the three stock watches, each sold complete with the band it
+  ships on: AE-1200WH-1AV black on rubber (₹2,995), AE-1200WHD-1AV silver on the
+  steel bracelet (₹3,995), AE-1200WHL-5AV brown on leather (₹4,495). The band is not
+  a separate choice — `normalizeBuild` derives it from the model, so no stored build
+  or link can separate the two.
 - **Step 2 · Windows** — four apertures, nine solid filters, six three-stop
   gradients, thirteen circle decals with transparent or opaque finishes. A gradient
   can be extended across every window as one continuous sweep.
 - **Step 3 · Text removal** — pick the printed legends (and the analog numbers ring)
-  to remove; $25 per watch regardless of how many.
-- **Pricing** — USD, in cents: $145 for the black watch, $180 gold, $185 silver,
-  plus $25 if any text is removed. The breakdown sits at the foot of the controls.
+  to remove; ₹1,500 per watch regardless of how many.
+- **Pricing** — whole rupees. The watch is the base price; colouring a window is
+  ₹500 each, except that one colour across all four is ₹1,000 rather than ₹2,000,
+  so filling every aperture the same way costs less than doing three separately.
+  Decals are included. The breakdown sits at the foot of the controls.
 - **Shareable builds** — "Copy link to build" writes the configuration to the URL
   hash; the same state is kept in `sessionStorage` between reloads.
 
@@ -52,7 +55,7 @@ components/
   WatchPreview.tsx  The composited watch SVG and its aperture hotspots
   MiniWatch.tsx     Window-picker diagram, sharing the renderer's aperture paths
 lib/
-  catalog.ts        Cases, bands, filters, windows, decals, text removal, pricing
+  catalog.ts        Models, bands, filters, windows, decals, text removal, pricing
   assets.ts         CDN artwork URLs
 ```
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import WatchPreview from './WatchPreview';
 import MiniWatch from './MiniWatch';
 import {
+  ALL_WINDOWS_PRICE,
   CASES,
   DECALS,
   DECAL_FINISHES,
@@ -11,6 +12,7 @@ import {
   FILTERS,
   TEXT_REMOVALS,
   TEXT_REMOVAL_PRICE,
+  WINDOW_COLOUR_PRICE,
   WINDOWS,
   type Build,
   type DecalFinish,
@@ -20,6 +22,7 @@ import {
   decalById,
   extendGradient,
   filterBackground,
+  modelName,
   money,
   normalizeBuild,
   priceBuild,
@@ -221,7 +224,7 @@ export default function Builder() {
       showToast(
         build.circleDecal
           ? 'Gradient extended across the thin, map and time windows. Your decal stays in place.'
-          : 'Gradient extended across all four windows.'
+          : `Gradient extended across all four windows · ${money(ALL_WINDOWS_PRICE)}.`
       );
       return;
     }
@@ -230,7 +233,7 @@ export default function Builder() {
       circleDecal: null,
       gradientLayout: 'separate',
     });
-    showToast('Applied to all four windows.');
+    showToast(`Applied to all four windows · ${money(ALL_WINDOWS_PRICE)}.`);
   };
 
   const clearWindow = () => {
@@ -389,11 +392,11 @@ export default function Builder() {
           <section className="option-section case-section" aria-labelledby="case-heading">
             <div className="section-heading">
               <h2 id="case-heading">
-                <span className="step">1</span> Case
+                <span className="step">1</span> Model
               </h2>
-              <span className="selection-label">{byId(CASES, build.case)!.name}</span>
+              <span className="selection-label">{modelName(build.case)}</span>
             </div>
-            <div className="choice-grid case-grid" role="radiogroup" aria-label="Case material and color">
+            <div className="choice-grid case-grid" role="radiogroup" aria-label="Watch model">
               {CASES.map((option) => (
                 <button
                   key={option.id}
@@ -406,8 +409,10 @@ export default function Builder() {
                 >
                   <span className="material-swatch" style={{ background: option.swatch }} />
                   <span className="choice-text">
-                    <span className="choice-name">{option.name}</span>
-                    <span className="choice-description">{option.description}</span>
+                    <span className="choice-name">{option.model}</span>
+                    <span className="choice-description">
+                      {option.name} · {money(option.price!)}
+                    </span>
                   </span>
                 </button>
               ))}
@@ -420,7 +425,10 @@ export default function Builder() {
               <h2 id="window-heading">
                 <span className="step">2</span> Windows
               </h2>
-              <span className="included-label">Filters &amp; decals included</span>
+              <span className="included-label">
+                {money(WINDOW_COLOUR_PRICE)} a window · {money(ALL_WINDOWS_PRICE)} for all four in
+                one colour
+              </span>
             </div>
 
             <div className="window-options">
@@ -588,8 +596,8 @@ export default function Builder() {
                   onClick={applyToAll}
                 >
                   {(activeFilter.colors?.length ?? 0) > 1
-                    ? 'Extend gradient across all windows'
-                    : 'Apply to all 4 windows'}
+                    ? `Extend gradient across all windows · ${money(ALL_WINDOWS_PRICE)}`
+                    : `Apply to all 4 windows · ${money(ALL_WINDOWS_PRICE)}`}
                 </button>
               )}
               <button type="button" className="text-button clear-button" onClick={clearWindow}>
@@ -671,7 +679,7 @@ export default function Builder() {
           {/* Price */}
           <section className="price-breakdown" aria-label="Price breakdown">
             <div>
-              <span>Custom Royale</span>
+              <span>{pricing.baseName}</span>
               <span>{money(pricing.base)}</span>
             </div>
             <div className="upgrade-prices">
@@ -686,7 +694,7 @@ export default function Builder() {
               <strong>Your total</strong>
               <strong>
                 {money(pricing.total)}
-                <span> USD</span>
+                <span> {pricing.currency}</span>
               </strong>
             </div>
             <p>All builds include a brand new genuine Casio AE1200 base watch.</p>
