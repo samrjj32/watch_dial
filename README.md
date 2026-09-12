@@ -14,10 +14,11 @@ design system are ports of that source rather than approximations.
   the circle decal clipped to the aperture. Every aperture path and the decal
   placement (centre 393 × 558.5, 164 px) come from the source, so the hotspots line
   up with the artwork exactly.
-- **Step 1 · Case** — black / silver / gold resin, plus polished, matte and black
-  metal (+$65).
+- **Step 1 · Case** — the three stock watches: black, silver and gold resin.
 - **Step 2 · Band** — black rubber, brown or black leather (+$35), steel bracelet
-  (+$40). Black leather is darkened with the renderer's gamma 2.15 curve.
+  (+$40). Black leather is darkened with the renderer's gamma 2.15 curve. Each case
+  ships on a band (black on rubber, silver on steel, gold on brown leather), so
+  choosing a case moves the band there until the customer picks one themselves.
 - **Step 3 · Windows** — four apertures, nine solid filters, six three-stop
   gradients, thirteen circle decals with transparent or opaque finishes. A gradient
   can be extended across every window as one continuous sweep.

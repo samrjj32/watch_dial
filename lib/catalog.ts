@@ -52,9 +52,6 @@ export const CASES: Option[] = [
   { id: 'resin-black', name: 'Black', description: 'Resin · included', price: 0, swatch: 'linear-gradient(135deg,#515252,#121314)' },
   { id: 'resin-silver', name: 'Silver', description: 'Painted resin · included', price: 0, swatch: 'linear-gradient(130deg,#f1f2f2,#a0a5a8)' },
   { id: 'resin-gold', name: 'Gold', description: 'Resin · included', price: 0, swatch: 'linear-gradient(135deg,#b5a080,#80694b)' },
-  { id: 'metal-polished', name: 'Metal, polished', description: '+$65', price: 6_500, swatch: 'linear-gradient(135deg,#8d979d 0%,#fbffff 40%,#a8adb0 52%,#e5e8e9 80%)' },
-  { id: 'metal-matte', name: 'Metal, matte', description: '+$65', price: 6_500, swatch: 'linear-gradient(135deg,#d3d7d8,#979fa3)' },
-  { id: 'metal-black', name: 'Metal, black', description: '+$65', price: 6_500, swatch: 'linear-gradient(135deg,#6b6f72,#1b1d1e)' },
 ];
 
 export const BANDS: Option[] = [
@@ -65,9 +62,8 @@ export const BANDS: Option[] = [
 ];
 
 /**
- * The band each case ships with. The three resin watches are stocked as
- * complete watches — black on rubber, silver on the steel bracelet, gold on
- * brown leather — and the metal cases follow the finish they are closest to.
+ * The band each case ships with. The three watches are stocked complete —
+ * black on rubber, silver on the steel bracelet, gold on brown leather.
  * Choosing a case moves the band to its pairing until the customer picks a
  * band themselves, after which their choice is left alone.
  */
@@ -75,9 +71,6 @@ export const STOCK_BAND: Record<string, string> = {
   'resin-black': 'rubber-black',
   'resin-silver': 'steel',
   'resin-gold': 'leather-brown',
-  'metal-polished': 'steel',
-  'metal-matte': 'steel',
-  'metal-black': 'rubber-black',
 };
 
 export const stockBandFor = (caseId: string) => STOCK_BAND[caseId] ?? 'rubber-black';

@@ -19,9 +19,6 @@ export const ASSETS = {
 
 /** Case artwork is the complete watch photograph in that case colour. */
 export const CASE_IMAGES: Record<string, string> = {
-  'metal-black': `${FILES}/jellylab-builder-r10-cases-metal-black.webp?v=1788910353`,
-  'metal-matte': `${FILES}/jellylab-builder-r10-cases-metal-matte.webp?v=1788910363`,
-  'metal-polished': `${FILES}/jellylab-builder-r10-cases-metal-polished.webp?v=1788910372`,
   'resin-black': `${FILES}/jellylab-builder-r10-cases-resin-black.webp?v=1788910382`,
   'resin-silver': `${FILES}/jellylab-builder-r10-cases-resin-silver.webp?v=1788910401`,
   // Served as a base64 payload in a theme text asset; resolved at runtime.
