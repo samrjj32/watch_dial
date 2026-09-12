@@ -13,7 +13,7 @@
 export const WINDOW_COLOUR_PRICE = 500;
 /** One colour across all four windows, instead of 4 x WINDOW_COLOUR_PRICE. */
 export const ALL_WINDOWS_PRICE = 1_000;
-export const TEXT_REMOVAL_PRICE = 1_500;
+export const TEXT_REMOVAL_PRICE = 500;
 
 /* ------------------------------------------------------------------ */
 /* Photograph geometry                                                 */

@@ -26,7 +26,7 @@ inside a host that provides those.
   gradients, thirteen circle decals with transparent or opaque finishes. A gradient
   can be extended across every window as one continuous sweep.
 - **Step 3 · Text removal** — pick the printed legends (and the analog numbers ring)
-  to remove; ₹1,500 per watch regardless of how many.
+  to remove; ₹500 per watch regardless of how many.
 - **Pricing** — whole rupees. The watch is the base price; colouring a window is
   ₹500 each, except that one colour across all four is ₹1,000 rather than ₹2,000,
   so filling every aperture the same way costs less than doing three separately.
