@@ -64,6 +64,24 @@ export const BANDS: Option[] = [
   { id: 'steel', name: 'Steel bracelet', description: '+$40', price: 4_000, swatch: 'repeating-linear-gradient(90deg,#b0b7bc 0 5px,#f0f2f3 5px 8px,#899399 8px 11px)' },
 ];
 
+/**
+ * The band each case ships with. The three resin watches are stocked as
+ * complete watches — black on rubber, silver on the steel bracelet, gold on
+ * brown leather — and the metal cases follow the finish they are closest to.
+ * Choosing a case moves the band to its pairing until the customer picks a
+ * band themselves, after which their choice is left alone.
+ */
+export const STOCK_BAND: Record<string, string> = {
+  'resin-black': 'rubber-black',
+  'resin-silver': 'steel',
+  'resin-gold': 'leather-brown',
+  'metal-polished': 'steel',
+  'metal-matte': 'steel',
+  'metal-black': 'rubber-black',
+};
+
+export const stockBandFor = (caseId: string) => STOCK_BAND[caseId] ?? 'rubber-black';
+
 export const BOXES: Option[] = [
   { id: 'none', name: 'No preference', color: null },
   { id: 'dark-blue', name: 'Dark blue', color: '#223462' },
@@ -332,8 +350,10 @@ export interface Build {
   box: string;
 }
 
+// Starts on the black watch: the one stock pairing where nothing is an upgrade,
+// so the builder opens at the $145 headline price.
 export const DEFAULT_BUILD: Build = {
-  case: 'resin-silver',
+  case: 'resin-black',
   band: 'rubber-black',
   windows: ['none', 'none', 'none', 'none'],
   gradientLayout: 'separate',
