@@ -1,623 +1,996 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import WatchPreview from './WatchPreview';
+import MiniWatch from './MiniWatch';
+import BackplatePreview from './BackplatePreview';
+import CartDrawer, { type CartItem } from './CartDrawer';
 import {
-  INITIAL_BUILD,
-  buildFromParams,
-  buildPricing,
-  buildToParams,
-  emptyWindow,
-  type BuildState,
-} from '@/lib/build-state';
-import {
-  ASSETS,
-  BOX_OPTIONS,
+  BANDS,
+  BOXES,
+  CASES,
   DECALS,
+  DECAL_FINISHES,
+  DEFAULT_BUILD,
+  ENGRAVING_MAX_LENGTH,
   ENGRAVING_FONTS,
-  ENGRAVING_MAX_CHARS,
-  GRADIENT_FILTERS,
-  SERVICE_PRICE,
-  SOLID_FILTERS,
-  TEXT_REMOVAL_TARGETS,
+  ENGRAVING_ROWS,
+  ENGRAVING_EXAMPLES,
+  FILTERS,
+  TEXT_REMOVALS,
+  TEXT_REMOVAL_PRICE,
+  ENGRAVING_PRICE,
   WINDOWS,
-  decalAsset,
-  getDecal,
-  getFilter,
-  type WindowId,
-} from '@/lib/customizer';
-import { BAND_OPTIONS, CASE_OPTIONS, PRODUCT, getBand, getCase } from '@/lib/product';
-import { money } from '@/lib/format';
+  type Build,
+  type DecalFinish,
+  byId,
+  buildProperties,
+  circleDecalName,
+  decalById,
+  engravingFont,
+  extendGradient,
+  filterBackground,
+  hasEngraving,
+  money,
+  normalizeBuild,
+  normalizeEngravingLine,
+  priceBuild,
+  usShippingStatus,
+} from '@/lib/catalog';
+import { ASSETS, CASE_IMAGES, decalImage, isTextAsset } from '@/lib/assets';
 
-const FREE_SHIPPING_AT = 15000; // ₹
+const STORAGE_KEY = 'jellylab:builder';
+
+/** Keyboard support for every `role="radiogroup"` in the builder. */
+function handleRadioKeys(event: React.KeyboardEvent<HTMLElement>) {
+  const current = (event.target as HTMLElement).closest?.('[role=radio]') as HTMLElement | null;
+  const group = current?.closest('[role=radiogroup]');
+  if (!current || !group) return;
+  const options = Array.from(group.querySelectorAll<HTMLElement>('[role=radio]'));
+  const index = options.indexOf(current);
+  let target: HTMLElement | undefined;
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') target = options[(index + 1) % options.length];
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') target = options[(index - 1 + options.length) % options.length];
+  if (event.key === 'Home') target = options[0];
+  if (event.key === 'End') target = options.at(-1);
+  if (!target) return;
+  event.preventDefault();
+  target.click();
+  target.focus();
+}
+
+/**
+ * Decorative artwork. If the CDN is unreachable the image collapses instead of
+ * leaving a broken-image glyph in the middle of a swatch or a heading.
+ */
+function Art({
+  src,
+  size,
+  className,
+}: {
+  src: string;
+  size: number;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <img
+      className={className}
+      src={src}
+      width={size}
+      height={size}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+/** Tracks whether the artwork for the current case has arrived. */
+function useArtworkReady(build: Build) {
+  const caseUrl = CASE_IMAGES[build.case] ?? CASE_IMAGES['resin-silver'];
+  const decal = decalById(build.circleDecal?.id);
+  const decalUrl = decal ? decalImage(decal.image) : null;
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+
+  useEffect(() => {
+    let active = true;
+    setState('loading');
+    const load = (src: string) =>
+      new Promise<void>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error(src));
+        image.src = src;
+      });
+    // Text assets carry their payload as base64 and are resolved by the preview.
+    const sources = [isTextAsset(caseUrl) ? null : caseUrl, decalUrl].filter(Boolean) as string[];
+    Promise.all(sources.map(load))
+      .then(() => active && setState('ready'))
+      .catch(() => active && setState('error'));
+    return () => {
+      active = false;
+    };
+  }, [caseUrl, decalUrl]);
+
+  return state;
+}
 
 export default function Builder() {
-  const [build, setBuild] = useState<BuildState>(INITIAL_BUILD);
+  const [build, setBuild] = useState<Build>(DEFAULT_BUILD);
+  const [activeWindow, setActiveWindow] = useState(0);
+  const [expanded, setExpanded] = useState({ removal: false, engraving: false });
   const [toast, setToast] = useState('');
-  const [cartError, setCartError] = useState('');
-  const [logoOk, setLogoOk] = useState(true);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const windowsSection = useRef<HTMLElement>(null);
+  const previewCard = useRef<HTMLDivElement>(null);
   const hydrated = useRef(false);
 
-  // Hydrate a shared build from the URL once (client only, keeps the page static).
+  /* -------------------------------------------------- restore a saved build */
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
-    const params = new URLSearchParams(window.location.search);
-    if ([...params.keys()].length > 0) setBuild(buildFromParams(params));
+    try {
+      const encoded =
+        new URLSearchParams(window.location.hash.slice(1)).get('build') ||
+        sessionStorage.getItem(STORAGE_KEY);
+      if (encoded && encoded.length < 4000) setBuild(normalizeBuild(JSON.parse(encoded)));
+    } catch {
+      /* a malformed link just starts from the default build */
+    }
   }, []);
 
-  const pricing = useMemo(() => buildPricing(build), [build]);
-  const activeWindow = WINDOWS.find((w) => w.id === build.activeWindow)!;
-  const activeState = build.windows[build.activeWindow];
-  const activeFilter = getFilter(activeState.filterId);
-  const activeDecal = getDecal(activeState.decalId);
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(build));
+    } catch {
+      /* private mode */
+    }
+  }, [build]);
 
-  const showToast = (message: string) => {
+  /* -------------------------------------------------- derived values */
+  const pricing = useMemo(() => priceBuild(build), [build]);
+  const properties = useMemo(() => buildProperties(build), [build]);
+  const shipping = usShippingStatus(pricing.total);
+  const artwork = useArtworkReady(build);
+  const window0Decal = decalById(build.circleDecal?.id);
+  const activeFilter = byId(FILTERS, build.windows[activeWindow])!;
+  const activeIsDecal = activeWindow === 0 && !!build.circleDecal;
+  const engravingSelected = hasEngraving(build.engraving);
+  const previewEngraving = engravingSelected
+    ? build.engraving
+    : { ...ENGRAVING_EXAMPLES, font: build.engraving.font };
+  const watchLabel = 'Your Casio Royale: ' + Object.values(properties).join(', ');
+
+  const update = useCallback((patch: Partial<Build>) => {
+    setBuild((current) => normalizeBuild({ ...current, ...patch }));
+  }, []);
+
+  const showToast = useCallback((message: string) => {
     setToast(message);
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(''), 2600);
-  };
+    toastTimer.current = setTimeout(() => setToast(''), 4000);
+  }, []);
 
-  const patch = (partial: Partial<BuildState>) => setBuild((b) => ({ ...b, ...partial }));
+  /*
+   * Publish the sticky preview's height so the stylesheet can keep scroll
+   * targets clear of it. Without this the browser's own scroll-into-view
+   * (focus, anchors, `scrollIntoView`) parks a control underneath the preview
+   * or the fixed purchase bar, where it can't be tapped.
+   */
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const card = previewCard.current;
+    const host = root.current;
+    if (!card || !host || typeof ResizeObserver === 'undefined') return;
+    const publish = () => {
+      host.style.setProperty('--sticky-preview', `${Math.round(card.offsetHeight)}px`);
+    };
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
 
-  const patchWindow = (id: WindowId, partial: Partial<BuildState['windows'][WindowId]>) =>
-    setBuild((b) => ({ ...b, windows: { ...b.windows, [id]: { ...b.windows[id], ...partial } } }));
-
-  const selectFilter = (filterId: string) => {
-    const next = activeState.filterId === filterId ? null : filterId;
-    patchWindow(build.activeWindow, { filterId: next, ...(next ? { decalId: null } : {}) });
-  };
-
-  const selectDecal = (decalId: string) => {
-    const decal = getDecal(decalId);
-    const next = activeState.decalId === decalId ? null : decalId;
-    patchWindow('w1', {
-      decalId: next,
-      decalFinish: next && decal && !decal.finishes.includes(activeState.decalFinish)
-        ? decal.finishes[0]
-        : activeState.decalFinish,
-      ...(next ? { filterId: null } : {}),
+  /* -------------------------------------------------- interactions */
+  const selectWindow = (index: number, { fromPreview = false } = {}) => {
+    setActiveWindow(index);
+    if (!fromPreview) return;
+    // On one-column layouts the controls sit below the sticky preview.
+    if (!window.matchMedia('(max-width: 820px)').matches) return;
+    const section = windowsSection.current;
+    if (!section) return;
+    const offset = (previewCard.current?.getBoundingClientRect().height ?? 0) + 12;
+    window.scrollTo({
+      top: section.getBoundingClientRect().top + window.scrollY - offset,
+      behavior: 'smooth',
     });
   };
 
-  const applyToAllWindows = () => {
-    if (!activeState.filterId) return showToast('Pick a filter color first.');
-    setBuild((b) => ({
-      ...b,
-      windows: Object.fromEntries(
-        WINDOWS.map((w) => [w.id, { ...b.windows[w.id], filterId: activeState.filterId, decalId: null }])
-      ) as BuildState['windows'],
-    }));
-    showToast('Filter applied to all 4 windows.');
+  const selectFilter = (id: string) => {
+    const windows = [...build.windows];
+    windows[activeWindow] = id;
+    update({
+      windows,
+      gradientLayout: 'separate',
+      ...(activeWindow === 0 ? { circleDecal: null } : {}),
+    });
   };
 
-  const clearWindow = () => patchWindow(build.activeWindow, emptyWindow());
+  const selectDecal = (id: string | 'none') => {
+    const decal = id === 'none' ? null : decalById(id);
+    if (id !== 'none' && !decal) return;
+    const windows = [...build.windows];
+    windows[0] = 'none';
+    update({ windows, circleDecal: decal ? { id: decal.id, finish: decal.finishes[0] } : null });
+  };
 
-  const toggleRemovalTarget = (target: string) =>
-    setBuild((b) => {
-      const targets = b.textRemoval.targets.includes(target)
-        ? b.textRemoval.targets.filter((t) => t !== target)
-        : [...b.textRemoval.targets, target];
-      return { ...b, textRemoval: { ...b.textRemoval, targets } };
-    });
+  const setDecalFinish = (finish: DecalFinish) => {
+    if (!build.circleDecal) return;
+    update({ circleDecal: { ...build.circleDecal, finish } });
+  };
 
-  const copyBuildLink = async () => {
-    const url = `${window.location.origin}${window.location.pathname}?${buildToParams(build)}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      showToast('Build link copied to clipboard.');
-    } catch {
-      showToast(url);
+  const applyToAll = () => {
+    if (activeIsDecal) return;
+    if ((activeFilter.colors?.length ?? 0) > 1) {
+      setBuild(extendGradient(build, activeFilter.id));
+      showToast(
+        build.circleDecal
+          ? 'Gradient extended across the thin, map and time windows. Your decal stays in place.'
+          : 'Gradient extended across all four windows.'
+      );
+      return;
     }
+    update({
+      windows: WINDOWS.map(() => activeFilter.id),
+      circleDecal: null,
+      gradientLayout: 'separate',
+    });
+    showToast('Applied to all four windows.');
+  };
+
+  const clearWindow = () => {
+    const windows = [...build.windows];
+    windows[activeWindow] = 'none';
+    update({
+      windows,
+      gradientLayout: 'separate',
+      ...(activeWindow === 0 ? { circleDecal: null } : {}),
+    });
+  };
+
+  const toggleRemoval = (id: string, checked: boolean) => {
+    const selected = new Set(build.textRemovals);
+    if (checked) selected.add(id);
+    else selected.delete(id);
+    update({ textRemovals: [...selected] });
+  };
+
+  const toggleAllRemovals = (checked: boolean) => {
+    update({ textRemovals: checked ? TEXT_REMOVALS.map((option) => option.id) : [] });
+  };
+
+  const copyBuild = async () => {
+    const url = new URL(window.location.href);
+    url.hash = new URLSearchParams({ build: JSON.stringify(build) }).toString();
+    try {
+      await navigator.clipboard.writeText(url.href);
+      showToast('Build link copied.');
+    } catch {
+      window.history.replaceState(null, '', url);
+      showToast('Your build is in the address bar. Copy the URL to share it.');
+    }
+  };
+
+  const startOver = () => {
+    setBuild(DEFAULT_BUILD);
+    setActiveWindow(0);
+    setExpanded({ removal: false, engraving: false });
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    showToast('Started a fresh build.');
+  };
+
+  const surpriseMe = () => {
+    const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
+    const colours = FILTERS.filter((filter) => filter.colors);
+    const useDecal = Math.random() < 0.35;
+    const decal = pick(DECALS);
+    setBuild(
+      normalizeBuild({
+        ...DEFAULT_BUILD,
+        case: pick(CASES).id,
+        band: pick(BANDS).id,
+        windows: WINDOWS.map(() => pick(colours).id),
+        circleDecal: useDecal ? { id: decal.id, finish: decal.finishes[0] } : null,
+      })
+    );
+    showToast('Here is a random Royale. Keep tweaking it.');
   };
 
   const addToCart = () => {
-    if (!build.termsAccepted) {
-      setCartError('Please confirm that custom designs are exempt from returns.');
-      return;
-    }
-    setCartError('');
-    const payload = {
-      productId: PRODUCT.id,
-      variantId: pricing.variant.id,
-      variantTitle: pricing.variant.title,
-      quantity: 1,
-      price: pricing.total,
-      properties: {
-        ...Object.fromEntries(
-          WINDOWS.map((w) => {
-            const s = build.windows[w.id];
-            const value = s.decalId
-              ? `${getDecal(s.decalId)?.label} decal (${s.decalFinish})`
-              : getFilter(s.filterId)?.label ?? 'Empty (no color)';
-            return [`Window ${w.index}`, value];
-          })
-        ),
-        ...(build.textRemoval.enabled && build.textRemoval.targets.length
-          ? { 'Text removal': build.textRemoval.targets.join(', ') }
-          : {}),
-        ...(build.engraving.enabled && (build.engraving.top || build.engraving.bottom)
-          ? {
-              'Engraving font': ENGRAVING_FONTS.find((f) => f.id === build.engraving.fontId)?.label,
-              'Engraving top': build.engraving.top,
-              'Engraving bottom': build.engraving.bottom,
-            }
-          : {}),
-        Box: BOX_OPTIONS.find((o) => o.id === build.boxId)?.label,
-      },
-    };
-    console.info('[cart] add', payload);
-    showToast(`Added to cart — ${money(pricing.total)} (demo store, no checkout)`);
+    const snapshot = normalizeBuild(build);
+    const id =
+      'JL-' +
+      (globalThis.crypto?.randomUUID?.().slice(0, 8).toUpperCase() ??
+        Math.random().toString(36).slice(2, 10).toUpperCase());
+    setCart((items) => [
+      ...items,
+      { id, build: snapshot, quantity: 1, unitPrice: priceBuild(snapshot).total },
+    ]);
+    setCartOpen(true);
   };
 
-  const shippingRemaining = Math.max(0, FREE_SHIPPING_AT - pricing.total);
+  /* -------------------------------------------------- render */
+  const sections: Array<{
+    key: 'removal' | 'engraving';
+    label: string;
+    selected: boolean;
+  }> = [
+    { key: 'removal', label: 'text removal', selected: build.textRemovals.length > 0 },
+    { key: 'engraving', label: 'laser engraving', selected: engravingSelected },
+  ];
+  const toggleLabel = (key: 'removal' | 'engraving') => {
+    const section = sections.find((s) => s.key === key)!;
+    return expanded[key] ? 'Done' : section.selected ? 'Edit' : 'Add';
+  };
+
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <main className="builder">
-      {/* ------------------------------------------------ preview column */}
-      <div className="preview-column">
-        <div className="preview-sticky">
-          <div className="preview-card">
-            <div className="preview-topline">
-              <span className="eyebrow">Your Royale · Digital mockup</span>
-              <span className="made-to-order">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-                Hand built to order
-              </span>
-            </div>
+    <div className="jellylab-royale-builder" ref={root} onKeyDown={handleRadioKeys}>
+      <header className="topbar">
+        <span className="brand">
+          <span className="brand-star" aria-hidden>
+            ✳
+          </span>
+          JellyLab
+        </span>
+        <span className="topbar-product">Custom Casio Royale</span>
+        <span className="prototype-pill">Prototype</span>
+        <button
+          type="button"
+          className="cart-trigger"
+          onClick={() => setCartOpen(true)}
+          aria-label={`Cart, ${cartCount} ${cartCount === 1 ? 'item' : 'items'}`}
+        >
+          {/* Narrow layouts drop the word, so the button keeps a glyph. */}
+          <svg className="cart-icon" viewBox="0 0 24 24" aria-hidden>
+            <path d="M6 7h12l-1 12H7L6 7Zm3 0a3 3 0 0 1 6 0" />
+          </svg>
+          <span className="cart-label">Cart</span>
+          <span className="cart-count">{cartCount}</span>
+        </button>
+      </header>
 
-            <WatchPreview build={build} onSelectWindow={(id) => patch({ activeWindow: id })} />
-
-            <div className="preview-caption">
-              <span>Tap a window to color it.</span>
-              <span className="active-caption">
-                0{activeWindow.index} · {activeWindow.label} selected
-              </span>
-              <span>3,000+ built</span>
-              <span aria-label="4.92 stars based on 390 plus reviews">
-                4.92 <span className="review-star" aria-hidden>★</span> (390+ reviews)
-              </span>
-            </div>
-          </div>
-
-          <section className="build-summary" aria-labelledby="summary-title">
-            <div className="summary-heading">
-              <h2 className="eyebrow" id="summary-title">Your build</h2>
-              <button type="button" className="text-button" onClick={copyBuildLink}>
-                Copy link to build ↗
-              </button>
-            </div>
-            <dl>
-              <dt>Case</dt>
-              <dd>{getCase(build.caseId).label}</dd>
-              <dt>Band</dt>
-              <dd>{getBand(build.bandId).label}</dd>
-              {WINDOWS.map((w) => {
-                const s = build.windows[w.id];
-                const value = s.decalId
-                  ? `${getDecal(s.decalId)?.label} decal`
-                  : getFilter(s.filterId)?.label ?? 'No filter';
-                return (
-                  <FragmentRow key={w.id} label={`Window ${w.index}`} value={value} />
-                );
-              })}
-              <dt>Services</dt>
-              <dd>
-                {pricing.service === 'none'
-                  ? 'None'
-                  : pricing.variant.title.split(' / ').slice(-1)[0]}
-              </dd>
-              <dt>Box</dt>
-              <dd>{BOX_OPTIONS.find((o) => o.id === build.boxId)?.label}</dd>
-            </dl>
-          </section>
-        </div>
-      </div>
-
-      {/* ------------------------------------------------ controls column */}
-      <div className="controls-column">
-        <div className="intro">
-          <div className="builder-heading">
-            {logoOk ? (
-              <img
-                className="builder-logo"
-                src={ASSETS.logo}
-                alt="JellyLab logo"
-                width={52}
-                height={52}
-                onError={() => setLogoOk(false)}
-              />
-            ) : (
-              <span className="builder-logo" aria-hidden style={{ display: 'grid', placeItems: 'center', fontSize: 24 }}>⌚</span>
-            )}
-            <h1>JellyLab Casio Royale Builder</h1>
-          </div>
-          <div className="builder-proof" aria-label="About JellyLab">
-            <div className="proof-item"><strong>3,000+</strong><span>watches built</span></div>
-            <div className="proof-item">
-              <strong><span className="proof-star" aria-hidden>★</span> 4.92 stars</strong>
-              <span>based on 390+ reviews</span>
-            </div>
-            <div className="proof-item"><strong>150k+</strong><span>follow our builds on YouTube</span></div>
-          </div>
-        </div>
-
-        {/* 1 · Case */}
-        <section className="option-section" aria-labelledby="case-heading">
-          <div className="section-heading">
-            <h2 id="case-heading"><span className="step">1</span> Case</h2>
-            <span className="selection-label">{getCase(build.caseId).label}</span>
-          </div>
-          <div className="choice-grid">
-            {CASE_OPTIONS.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                className={`choice${build.caseId === c.id ? ' selected' : ''}`}
-                onClick={() => patch({ caseId: c.id })}
-                aria-pressed={build.caseId === c.id}
-              >
-                <span className="swatch" style={{ background: `linear-gradient(135deg, ${c.swatch[0]}, ${c.swatch[1]})` }} />
-                <span className="choice-label">
-                  {c.label}
-                  <span className="choice-sub">{c.tier === 'metal' ? `+ ${money(6300)}` : 'Included'}</span>
+      <div className="builder">
+        {/* ------------------------------------------------ preview */}
+        <div className="preview-column">
+          <div className="preview-sticky">
+            <div className="preview-card" ref={previewCard}>
+              <div className="preview-topline">
+                <p className="eyebrow">YOUR ROYALE · DIGITAL MOCKUP</p>
+                <span className="made-to-order">
+                  <svg viewBox="0 0 24 24" aria-hidden>
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  Hand built to order
                 </span>
-              </button>
-            ))}
-          </div>
-        </section>
+              </div>
 
-        {/* 2 · Band */}
-        <section className="option-section" aria-labelledby="band-heading">
-          <div className="section-heading">
-            <h2 id="band-heading"><span className="step">2</span> Band</h2>
-            <span className="selection-label">{getBand(build.bandId).label}</span>
+              <div className="watch-stage" aria-busy={artwork === 'loading'}>
+                <WatchPreview
+                  className="watch-canvas"
+                  build={build}
+                  activeWindow={activeWindow}
+                  onSelectWindow={(index) => selectWindow(index, { fromPreview: true })}
+                  interactive
+                  label={watchLabel}
+                />
+                <span className="preview-logo" aria-hidden>
+                  <Art className="preview-logo-spin" src={ASSETS.logoSpin} size={56} />
+                </span>
+                {artwork !== 'ready' && (
+                  <div className="image-loading">
+                    {artwork === 'loading'
+                      ? 'Loading your watch preview…'
+                      : 'This watch preview could not load. Select your option again to retry.'}
+                  </div>
+                )}
+              </div>
+
+              <div className="preview-caption">
+                <span className="preview-instruction">Tap a window to color it.</span>
+                <span className="active-caption">
+                  0{activeWindow + 1} · {WINDOWS[activeWindow].name} selected
+                </span>
+                <span className="preview-mobile-proof">3,000+ built</span>
+                <span className="preview-mobile-proof preview-review">
+                  4.92 <span className="review-star" aria-hidden>★</span> (390+)
+                </span>
+              </div>
+            </div>
+
+            <section className="build-summary" aria-labelledby="summary-title">
+              <div className="summary-heading">
+                <h2 className="eyebrow" id="summary-title">
+                  YOUR BUILD
+                </h2>
+                <button type="button" className="text-button" onClick={copyBuild}>
+                  Copy link to build ↗
+                </button>
+              </div>
+              <dl>
+                {Object.entries(properties).map(([label, value]) => (
+                  <div key={label} style={{ display: 'contents' }}>
+                    <dt>{label}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
           </div>
-          <div className="choice-grid">
-            {BAND_OPTIONS.map((b) => {
-              const upcharge =
-                b.id === 'black-rubber' ? 0 : b.id === 'steel' ? 3900 : 3400;
-              return (
+        </div>
+
+        {/* ------------------------------------------------ controls */}
+        <div className="controls-column">
+          <div className="intro">
+            <div className="builder-heading">
+              <Art className="builder-logo" src={ASSETS.logo} size={64} />
+              <h1>
+                JellyLab <span>Casio Royale</span> Builder
+              </h1>
+            </div>
+            <p>
+              Choose the case, strap, window colours and finishing services. Every Royale is a
+              genuine Casio AE1200 rebuilt by hand.
+            </p>
+            <div className="builder-proof" aria-label="About JellyLab">
+              <div className="proof-item">
+                <strong>3,000+</strong>
+                <span>watches built</span>
+              </div>
+              <div className="proof-item">
+                <strong>
+                  <span className="proof-star" aria-hidden>★</span> 4.92 stars
+                </strong>
+                <span>based on 390+ reviews</span>
+              </div>
+              <div className="proof-item">
+                <strong>150k+</strong>
+                <span>follow our builds on YouTube</span>
+              </div>
+            </div>
+            <div className="build-actions">
+              <button type="button" className="outline-button" onClick={surpriseMe}>
+                Surprise me
+              </button>
+              <button type="button" className="text-button" onClick={startOver}>
+                Start over
+              </button>
+            </div>
+          </div>
+
+          {/* 1 · Case */}
+          <section className="option-section case-section" aria-labelledby="case-heading">
+            <div className="section-heading">
+              <h2 id="case-heading">
+                <span className="step">1</span> Case
+              </h2>
+              <span className="selection-label">{byId(CASES, build.case)!.name}</span>
+            </div>
+            <div className="choice-grid case-grid" role="radiogroup" aria-label="Case material and color">
+              {CASES.map((option) => (
                 <button
-                  key={b.id}
+                  key={option.id}
                   type="button"
-                  className={`choice${build.bandId === b.id ? ' selected' : ''}`}
-                  onClick={() => patch({ bandId: b.id })}
-                  aria-pressed={build.bandId === b.id}
+                  className="choice"
+                  role="radio"
+                  aria-checked={build.case === option.id}
+                  tabIndex={build.case === option.id ? 0 : -1}
+                  onClick={() => update({ case: option.id })}
                 >
-                  <span className="swatch" style={{ background: `linear-gradient(135deg, ${b.swatch[0]}, ${b.swatch[1]})` }} />
-                  <span className="choice-label">
-                    {b.label}
-                    <span className="choice-sub">{upcharge ? `+ ${money(upcharge)}` : 'Included'}</span>
+                  <span className="material-swatch" style={{ background: option.swatch }} />
+                  <span className="choice-text">
+                    <span className="choice-name">{option.name}</span>
+                    <span className="choice-description">{option.description}</span>
                   </span>
                 </button>
-              );
-            })}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
 
-        {/* 3 · Windows */}
-        <section className="option-section" aria-labelledby="window-heading">
-          <div className="section-heading">
-            <h2 id="window-heading"><span className="step">3</span> Windows</h2>
-            <span className="included-label">Filters &amp; decals included</span>
-          </div>
-
-          <div className="window-options" role="tablist" aria-label="Choose a window to customize">
-            {WINDOWS.map((w) => {
-              const s = build.windows[w.id];
-              const filter = getFilter(s.filterId);
-              const dotStyle: React.CSSProperties = s.decalId
-                ? { background: '#d9c9f2' }
-                : filter
-                  ? filter.kind === 'solid'
-                    ? { background: filter.colors[0] }
-                    : { background: `linear-gradient(${filter.colors[0]}, ${filter.colors[1]})` }
-                  : {};
-              return (
+          {/* 2 · Band */}
+          <section className="option-section" aria-labelledby="band-heading">
+            <div className="section-heading">
+              <h2 id="band-heading">
+                <span className="step">2</span> Band
+              </h2>
+              <span className="selection-label">{byId(BANDS, build.band)!.name}</span>
+            </div>
+            <div className="choice-grid band-grid" role="radiogroup" aria-label="Band material and color">
+              {BANDS.map((option) => (
                 <button
-                  key={w.id}
+                  key={option.id}
                   type="button"
-                  role="tab"
-                  aria-selected={build.activeWindow === w.id}
-                  className={`window-tab${build.activeWindow === w.id ? ' selected' : ''}`}
-                  onClick={() => patch({ activeWindow: w.id })}
+                  className="choice"
+                  role="radio"
+                  aria-checked={build.band === option.id}
+                  tabIndex={build.band === option.id ? 0 : -1}
+                  onClick={() => update({ band: option.id })}
                 >
-                  <span className="num">0{w.index}</span>
-                  <span className="dot" style={dotStyle} />
-                  <span style={{ fontSize: 12, fontWeight: 600 }}>{w.label}</span>
+                  <span className="material-swatch" style={{ background: option.swatch }} />
+                  <span className="choice-text">
+                    <span className="choice-name">{option.name}</span>
+                    <span className="choice-description">{option.description}</span>
+                  </span>
                 </button>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          </section>
 
-          <div className="window-description">
-            <span><strong>{activeWindow.description}</strong></span>
-            <span>
-              {activeDecal
-                ? `${activeDecal.label} decal`
-                : activeFilter
-                  ? activeFilter.label
-                  : 'No filter'}
-            </span>
-          </div>
+          {/* 3 · Windows */}
+          <section className="option-section" aria-labelledby="window-heading" ref={windowsSection}>
+            <div className="section-heading">
+              <h2 id="window-heading">
+                <span className="step">3</span> Windows
+              </h2>
+              <span className="included-label">Filters &amp; decals included</span>
+            </div>
 
-          {activeWindow.supportsDecals && (
-            <fieldset className="decal-fieldset">
-              <legend>Decals <span>· Included · Circle only</span></legend>
-              <div className="decal-options" role="radiogroup" aria-label="Circle decal">
-                {DECALS.map((d) => (
+            <div className="window-options">
+              {WINDOWS.map((window, index) => {
+                const decal = index === 0 ? window0Decal : null;
+                const filter = byId(FILTERS, build.windows[index])!;
+                return (
                   <button
-                    key={d.id}
+                    key={window.id}
                     type="button"
+                    className="window-option"
+                    aria-pressed={index === activeWindow}
+                    aria-label={`Window ${index + 1}, ${window.name}: ${
+                      decal ? circleDecalName(build.circleDecal) : filter.name
+                    }`}
+                    onClick={() => selectWindow(index)}
+                  >
+                    <MiniWatch build={build} window={index} activeWindow={activeWindow} />
+                    <span>
+                      {index + 1} · {window.name}
+                    </span>
+                    {decal ? (
+                      <Art
+                        className="window-filter-dot window-decal-dot"
+                        src={decalImage(decal.image)}
+                        size={14}
+                      />
+                    ) : (
+                      <i className="window-filter-dot" style={{ background: filterBackground(filter) }} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="window-description">
+              <span>{WINDOWS[activeWindow].description}</span>
+              <span className="current-filter">
+                {activeIsDecal
+                  ? circleDecalName(build.circleDecal)
+                  : activeFilter.id === 'none'
+                    ? 'No filter'
+                    : activeFilter.name}
+              </span>
+            </p>
+
+            {activeWindow === 0 && (
+              <fieldset className="decal-fieldset">
+                <legend>
+                  DECALS <span>Included · Circle only</span>
+                </legend>
+                <div className="decal-options" role="radiogroup" aria-label="Circle decal">
+                  <button
+                    type="button"
+                    className="decal-option"
                     role="radio"
-                    aria-checked={activeState.decalId === d.id}
-                    className={`decal-chip${activeState.decalId === d.id ? ' selected' : ''}`}
-                    onClick={() => selectDecal(d.id)}
-                    title={d.label}
+                    aria-checked={!build.circleDecal}
+                    tabIndex={!build.circleDecal ? 0 : -1}
+                    onClick={() => selectDecal('none')}
                   >
-                    <DecalThumb id={d.id} slug={d.slug} label={d.label} />
+                    <span className="decal-disc decal-none" aria-hidden />
+                    <span>None</span>
                   </button>
-                ))}
-              </div>
-              {activeDecal && activeDecal.finishes.length > 1 && (
-                <div className="decal-finish">
-                  <span>Decal finish</span>
-                  <div className="pill-group" role="radiogroup" aria-label="Decal finish">
-                    {activeDecal.finishes.map((finish) => (
-                      <button
-                        key={finish}
-                        type="button"
-                        role="radio"
-                        aria-checked={activeState.decalFinish === finish}
-                        className={activeState.decalFinish === finish ? 'selected' : ''}
-                        onClick={() => patchWindow('w1', { decalFinish: finish })}
-                      >
-                        {finish === 'transparent' ? 'Transparent' : 'Opaque'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </fieldset>
-          )}
-
-          <fieldset className="filter-fieldset">
-            <legend>Filter colors</legend>
-            <div className="color-options">
-              {SOLID_FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  className={`filter-chip${activeState.filterId === f.id ? ' selected' : ''}`}
-                  style={{ background: f.colors[0] }}
-                  title={f.label}
-                  aria-pressed={activeState.filterId === f.id}
-                  onClick={() => selectFilter(f.id)}
-                >
-                  {f.uv && <span className="uv">UV</span>}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="filter-fieldset gradient-fieldset">
-            <legend>Gradient filters</legend>
-            <div className="gradient-options">
-              {GRADIENT_FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  type="button"
-                  className={`filter-chip${activeState.filterId === f.id ? ' selected' : ''}`}
-                  style={{ background: `linear-gradient(${f.colors[0]}, ${f.colors[1]})` }}
-                  title={f.label}
-                  aria-pressed={activeState.filterId === f.id}
-                  onClick={() => selectFilter(f.id)}
-                />
-              ))}
-            </div>
-          </fieldset>
-
-          <div className="window-actions">
-            <button type="button" className="outline-button" onClick={applyToAllWindows}>
-              Apply to all 4 windows
-            </button>
-            <button type="button" className="text-button clear-button" onClick={clearWindow}>
-              Clear this window
-            </button>
-          </div>
-        </section>
-
-        {/* 4 · Text removal */}
-        <section className="option-section" aria-labelledby="text-removal-heading">
-          <div className="section-heading">
-            <h2 id="text-removal-heading"><span className="step">4</span> Text removal</h2>
-            <div className="service-heading-actions">
-              <span className="selection-label">Optional · + {money(SERVICE_PRICE)}</span>
-              <button
-                type="button"
-                className="service-toggle"
-                aria-expanded={build.textRemoval.enabled}
-                aria-controls="text-removal-panel"
-                onClick={() =>
-                  patch({ textRemoval: { ...build.textRemoval, enabled: !build.textRemoval.enabled } })
-                }
-              >
-                {build.textRemoval.enabled ? 'Remove' : 'Add'}
-              </button>
-            </div>
-          </div>
-          {build.textRemoval.enabled && (
-            <div id="text-removal-panel">
-              <p className="removal-help">
-                Choose the words or analog clock numbers to remove. {money(SERVICE_PRICE)} per watch,
-                regardless of how many you select.
-              </p>
-              <div className="removal-options" role="group" aria-labelledby="text-removal-heading">
-                {TEXT_REMOVAL_TARGETS.map((target) => (
-                  <button
-                    key={target}
-                    type="button"
-                    className={`removal-chip${build.textRemoval.targets.includes(target) ? ' selected' : ''}`}
-                    aria-pressed={build.textRemoval.targets.includes(target)}
-                    onClick={() => toggleRemovalTarget(target)}
-                  >
-                    {target}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* 5 · Laser engraving */}
-        <section className="option-section" aria-labelledby="engraving-heading">
-          <div className="section-heading">
-            <h2 id="engraving-heading"><span className="step">5</span> Laser engraving</h2>
-            <div className="service-heading-actions">
-              <span className="selection-label">Optional · + {money(SERVICE_PRICE)}</span>
-              <button
-                type="button"
-                className="service-toggle"
-                aria-expanded={build.engraving.enabled}
-                aria-controls="engraving-panel"
-                onClick={() => patch({ engraving: { ...build.engraving, enabled: !build.engraving.enabled } })}
-              >
-                {build.engraving.enabled ? 'Remove' : 'Add'}
-              </button>
-            </div>
-          </div>
-          {build.engraving.enabled && (
-            <div id="engraving-panel">
-              <p className="engraving-help">
-                Add a personal message above or below the original Casio engraving. Leave either row
-                blank to skip it.
-              </p>
-              <fieldset className="filter-fieldset">
-                <legend>Font</legend>
-                <div className="engraving-font-options">
-                  {ENGRAVING_FONTS.map((f) => (
+                  {DECALS.map((decal) => (
                     <button
-                      key={f.id}
+                      key={decal.id}
                       type="button"
-                      className={`font-chip${build.engraving.fontId === f.id ? ' selected' : ''}`}
-                      style={{ fontFamily: f.css, fontWeight: f.weight }}
-                      aria-pressed={build.engraving.fontId === f.id}
-                      onClick={() => patch({ engraving: { ...build.engraving, fontId: f.id } })}
+                      className="decal-option"
+                      role="radio"
+                      aria-checked={build.circleDecal?.id === decal.id}
+                      tabIndex={build.circleDecal?.id === decal.id ? 0 : -1}
+                      aria-label={`${decal.name} decal`}
+                      onClick={() => selectDecal(decal.id)}
                     >
-                      {f.label}
+                      <span className="decal-disc">
+                        <Art src={decalImage(decal.image)} size={52} />
+                      </span>
+                      <span>{decal.name}</span>
                     </button>
                   ))}
                 </div>
+                {window0Decal && window0Decal.finishes.length > 1 && (
+                  <div className="decal-finish">
+                    <span>Decal finish</span>
+                    <div role="radiogroup" aria-label="Decal finish" className="decal-finish-options">
+                      {DECAL_FINISHES.map((finish) => (
+                        <button
+                          key={finish.id}
+                          type="button"
+                          className="decal-finish-option"
+                          role="radio"
+                          aria-checked={build.circleDecal?.finish === finish.id}
+                          tabIndex={build.circleDecal?.finish === finish.id ? 0 : -1}
+                          onClick={() => setDecalFinish(finish.id)}
+                        >
+                          {finish.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </fieldset>
-              <div className="engraving-fields">
-                <EngravingInput
-                  id="engraving-top"
-                  label="Top row"
-                  value={build.engraving.top}
-                  onChange={(top) => patch({ engraving: { ...build.engraving, top } })}
-                />
-                <EngravingInput
-                  id="engraving-bottom"
-                  label="Bottom row"
-                  value={build.engraving.bottom}
-                  onChange={(bottom) => patch({ engraving: { ...build.engraving, bottom } })}
-                />
+            )}
+
+            <fieldset className="filter-fieldset">
+              <legend>FILTER COLORS</legend>
+              <div className="color-options" role="radiogroup" aria-label="Solid filter colors">
+                {FILTERS.filter((filter) => !filter.short).map((filter) => {
+                  const checked = !activeIsDecal && build.windows[activeWindow] === filter.id;
+                  return (
+                    <button
+                      key={filter.id}
+                      type="button"
+                      className="color-option"
+                      role="radio"
+                      aria-checked={checked}
+                      tabIndex={checked ? 0 : -1}
+                      data-value={filter.id}
+                      aria-label={filter.name}
+                      onClick={() => selectFilter(filter.id)}
+                    >
+                      <span className="color-disc" style={{ background: filterBackground(filter) }} />
+                      <span className="color-name">{filter.name}</span>
+                    </button>
+                  );
+                })}
               </div>
-              <p className="engraving-limits">Text only · Up to {ENGRAVING_MAX_CHARS} characters per row.</p>
-              <EngravingPreview build={build} />
-            </div>
-          )}
-        </section>
+            </fieldset>
 
-        {/* 6 · Watch box */}
-        <section className="option-section" aria-labelledby="box-heading">
-          <div className="section-heading">
-            <h2 id="box-heading"><span className="step">6</span> Watch box</h2>
-            <span className="included-label">Included</span>
-          </div>
-          <div className="choice-grid">
-            {BOX_OPTIONS.map((o) => (
-              <button
-                key={o.id}
-                type="button"
-                className={`choice${build.boxId === o.id ? ' selected' : ''}`}
-                aria-pressed={build.boxId === o.id}
-                onClick={() => patch({ boxId: o.id })}
-              >
-                <span className="swatch" style={{ background: o.id === 'none' ? '#e4e4ea' : 'linear-gradient(135deg,#9b5fff,#5b21b6)' }} />
-                <span className="choice-label">
-                  {o.label}
-                  <span className="choice-sub">{o.description}</span>
-                </span>
+            <fieldset className="filter-fieldset gradient-fieldset">
+              <legend>GRADIENT FILTERS</legend>
+              <div className="gradient-options" role="radiogroup" aria-label="Gradient filters">
+                {FILTERS.filter((filter) => filter.short).map((filter) => {
+                  const checked = !activeIsDecal && build.windows[activeWindow] === filter.id;
+                  return (
+                    <button
+                      key={filter.id}
+                      type="button"
+                      className="color-option"
+                      role="radio"
+                      aria-checked={checked}
+                      tabIndex={checked ? 0 : -1}
+                      aria-label={filter.name}
+                      onClick={() => selectFilter(filter.id)}
+                    >
+                      <span className="color-disc" style={{ background: filterBackground(filter) }} />
+                      <span className="color-name">
+                        <b>{filter.short}</b>
+                        {filter.direction}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+
+            <div className="window-actions">
+              {!activeIsDecal && (
+                <button
+                  type="button"
+                  className="outline-button"
+                  aria-pressed={
+                    (activeFilter.colors?.length ?? 0) > 1 && build.gradientLayout === 'continuous'
+                  }
+                  onClick={applyToAll}
+                >
+                  {(activeFilter.colors?.length ?? 0) > 1
+                    ? 'Extend gradient across all windows'
+                    : 'Apply to all 4 windows'}
+                </button>
+              )}
+              <button type="button" className="text-button clear-button" onClick={clearWindow}>
+                Clear this window
               </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Price breakdown */}
-        <section className="price-breakdown" aria-label="Price breakdown">
-          <div className="row">
-            <span>Custom Royale · {getCase(build.caseId).label} / {getBand(build.bandId).label}</span>
-            <span>{money(pricing.base)}</span>
-          </div>
-          {pricing.service !== 'none' && (
-            <div className="row">
-              <span>
-                {pricing.service === 'both'
-                  ? 'Text removal + laser engraving'
-                  : pricing.service === 'text-removal'
-                    ? 'Text removal'
-                    : 'Laser engraving'}
-              </span>
-              <span>+ {money(pricing.serviceAdd)}</span>
             </div>
-          )}
-          <div className="row total-line">
-            <strong>Your total</strong>
-            <strong>{money(pricing.total)} <small>{PRODUCT.currency}</small></strong>
-          </div>
-          <p className="note">All builds include a brand new genuine Casio AE1200 base watch.</p>
-          <label className="terms-check">
-            <input
-              type="checkbox"
-              checked={build.termsAccepted}
-              onChange={(e) => {
-                patch({ termsAccepted: e.target.checked });
-                if (e.target.checked) setCartError('');
-              }}
-            />
-            <span>I understand that custom designs are exempt from returns.</span>
-          </label>
-          {cartError && <p className="cart-error" role="alert">{cartError}</p>}
-        </section>
+          </section>
+
+          {/* 4 · Text removal */}
+          <section
+            className="option-section optional-service"
+            data-expanded={expanded.removal}
+            aria-labelledby="removal-heading"
+          >
+            <div className="section-heading">
+              <h2 id="removal-heading">
+                <span className="step">4</span> Text removal
+              </h2>
+              <div className="service-heading-actions">
+                <span className="selection-label">
+                  {build.textRemovals.length
+                    ? `+${money(TEXT_REMOVAL_PRICE)} added`
+                    : `Optional · +${money(TEXT_REMOVAL_PRICE)}`}
+                </span>
+                <button
+                  type="button"
+                  className="service-toggle"
+                  aria-expanded={expanded.removal}
+                  aria-label={`${toggleLabel('removal')} text removal`}
+                  onClick={() => setExpanded((s) => ({ ...s, removal: !s.removal }))}
+                >
+                  {toggleLabel('removal')}
+                </button>
+              </div>
+            </div>
+            {expanded.removal && (
+              <div>
+                <p className="removal-help">
+                  Choose the words or analog clock numbers to remove. {money(TEXT_REMOVAL_PRICE)} per
+                  watch, regardless of how many you select.
+                </p>
+                <div className="removal-options">
+                  <label
+                    className="removal-choice removal-all"
+                    data-selected={build.textRemovals.length > 0}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={build.textRemovals.length === TEXT_REMOVALS.length}
+                      ref={(element) => {
+                        if (element)
+                          element.indeterminate =
+                            build.textRemovals.length > 0 &&
+                            build.textRemovals.length < TEXT_REMOVALS.length;
+                      }}
+                      onChange={(event) => toggleAllRemovals(event.target.checked)}
+                    />
+                    <span>Remove all</span>
+                  </label>
+                  {TEXT_REMOVALS.map((option) => {
+                    const checked = build.textRemovals.includes(option.id);
+                    return (
+                      <label key={option.id} className="removal-choice" data-selected={checked}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          aria-label={`Remove ${option.name}`}
+                          onChange={(event) => toggleRemoval(option.id, event.target.checked)}
+                        />
+                        <span>{option.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* 5 · Laser engraving */}
+          <section
+            className="option-section optional-service engraving-section"
+            data-expanded={expanded.engraving}
+            aria-labelledby="engraving-heading"
+          >
+            <div className="section-heading">
+              <h2 id="engraving-heading">
+                <span className="step">5</span> Laser engraving
+              </h2>
+              <div className="service-heading-actions">
+                <span className="selection-label">
+                  {engravingSelected
+                    ? `+${money(ENGRAVING_PRICE)}`
+                    : `Optional · +${money(ENGRAVING_PRICE)}`}
+                </span>
+                <button
+                  type="button"
+                  className="service-toggle"
+                  aria-expanded={expanded.engraving}
+                  aria-label={`${toggleLabel('engraving')} laser engraving`}
+                  onClick={() => setExpanded((s) => ({ ...s, engraving: !s.engraving }))}
+                >
+                  {toggleLabel('engraving')}
+                </button>
+              </div>
+            </div>
+            {expanded.engraving && (
+              <div>
+                <p className="engraving-help">
+                  Add a personal message above or below the original Casio engraving. Leave either
+                  row blank to skip it.
+                </p>
+                <fieldset className="engraving-font-fieldset">
+                  <legend>Font</legend>
+                  <div className="engraving-font-options">
+                    {ENGRAVING_FONTS.map((font) => (
+                      <label
+                        key={font.id}
+                        className="engraving-font-choice"
+                        data-font={font.id}
+                        data-selected={build.engraving.font === font.id}
+                      >
+                        <input
+                          type="radio"
+                          name="engraving-font"
+                          value={font.id}
+                          checked={build.engraving.font === font.id}
+                          onChange={() =>
+                            update({ engraving: { ...build.engraving, font: font.id } })
+                          }
+                        />
+                        <span className="font-sample" aria-hidden>
+                          Aa
+                        </span>
+                        <span>{font.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <div className="engraving-fields">
+                  {ENGRAVING_ROWS.map((row) => (
+                    <div className="engraving-field" key={row}>
+                      <label htmlFor={`engraving-${row}`}>
+                        {row === 'top' ? 'Top row' : 'Bottom row'}
+                        <span>
+                          {Array.from(build.engraving[row]).length} / {ENGRAVING_MAX_LENGTH}
+                        </span>
+                      </label>
+                      <input
+                        id={`engraving-${row}`}
+                        type="text"
+                        autoComplete="off"
+                        spellCheck={false}
+                        placeholder={ENGRAVING_EXAMPLES[row]}
+                        value={build.engraving[row]}
+                        onChange={(event) =>
+                          update({
+                            engraving: {
+                              ...build.engraving,
+                              [row]: normalizeEngravingLine(event.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="engraving-limits">
+                  Text only · Up to {ENGRAVING_MAX_LENGTH} characters per row.
+                </p>
+
+                <figure className="engraving-preview">
+                  <BackplatePreview
+                    engraving={previewEngraving}
+                    label={`${engravingSelected ? 'Your' : 'Example'} stainless steel backplate with original Casio engraving. Font: ${engravingFont(build.engraving.font).name}. Top row: ${previewEngraving.top.trim() || 'blank'}. Bottom row: ${previewEngraving.bottom.trim() || 'blank'}.`}
+                  />
+                  <figcaption>
+                    <span>{engravingSelected ? 'YOUR BACKPLATE' : 'EXAMPLE ENGRAVING'}</span>
+                    {engravingSelected && (
+                      <button
+                        type="button"
+                        className="text-button"
+                        onClick={() =>
+                          update({ engraving: { ...build.engraving, top: '', bottom: '' } })
+                        }
+                      >
+                        Clear text
+                      </button>
+                    )}
+                  </figcaption>
+                </figure>
+              </div>
+            )}
+          </section>
+
+          {/* 6 · Watch box */}
+          <section className="option-section" aria-labelledby="box-heading">
+            <div className="section-heading">
+              <h2 id="box-heading">
+                <span className="step">6</span> Watch box
+              </h2>
+              <span className="included-label">Included</span>
+            </div>
+            <div className="choice-grid box-grid" role="radiogroup" aria-label="Watch box color">
+              {BOXES.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className="choice"
+                  role="radio"
+                  aria-checked={build.box === option.id}
+                  tabIndex={build.box === option.id ? 0 : -1}
+                  onClick={() => update({ box: option.id })}
+                >
+                  <span
+                    className="material-swatch"
+                    style={{
+                      background:
+                        option.color ?? 'repeating-linear-gradient(45deg,#fff 0 4px,#dcdce2 4px 6px)',
+                    }}
+                  />
+                  <span className="choice-text">
+                    <span className="choice-name">{option.name}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Price */}
+          <section className="price-breakdown" aria-label="Price breakdown">
+            <div>
+              <span>Custom Royale</span>
+              <span>{money(pricing.base)}</span>
+            </div>
+            <div className="upgrade-prices">
+              {pricing.upgrades.map((upgrade) => (
+                <div className="upgrade-price" key={upgrade.id}>
+                  <span>{upgrade.name}</span>
+                  <span>+{money(upgrade.price)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="total-line">
+              <strong>Your total</strong>
+              <strong>
+                {money(pricing.total)}
+                <span> USD</span>
+              </strong>
+            </div>
+            <p>All builds include a brand new genuine Casio AE1200 base watch.</p>
+          </section>
+        </div>
       </div>
 
       {/* ------------------------------------------------ purchase bar */}
       <footer className="purchase-bar">
         <div className="purchase-inner">
           <div className="purchase-summary">
-            <div className="purchase-price">
-              <span className="purchase-title">Your custom Royale · {pricing.variant.title}</span>
-              <strong>{money(pricing.total)} <small>{PRODUCT.currency}</small></strong>
-            </div>
-          </div>
-          <span className="purchase-note">
-            Gifting and uncertain? We have gift cards.
-          </span>
-          <div className="purchase-actions">
-            <div className="purchase-shipping" role="status" data-unlocked={shippingRemaining === 0}>
+            <span className="purchase-preview" aria-hidden>
+              <WatchPreview build={build} label="" />
+            </span>
+            <span className="purchase-price">
+              <span className="purchase-title">Your custom Royale</span>
               <strong>
-                {shippingRemaining === 0 ? 'Unlocked' : `${money(shippingRemaining)} to unlock`}
+                {money(pricing.total)} <small>USD</small>
               </strong>
-              <span>Free shipping over {money(FREE_SHIPPING_AT)}</span>
+            </span>
+          </div>
+          <p className="purchase-note">
+            <span>Gifting and uncertain?</span>
+            <a href="https://jellylabwatches.com/products/jellylab-watches-gift-card" target="_blank" rel="noopener noreferrer">
+              We have gift cards
+            </a>
+          </p>
+          <div className="purchase-actions">
+            <div className="purchase-shipping" data-unlocked={shipping.unlocked} aria-label={shipping.label}>
+              <strong>{shipping.headline}</strong>
+              <span>{shipping.detail}</span>
             </div>
-            <button type="button" className="primary-button" onClick={addToCart}>
+            <button type="button" className="primary-button add-button" onClick={addToCart}>
               <span>Add to cart</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <svg viewBox="0 0 24 24" aria-hidden>
                 <path d="M5 12h14m-5-5 5 5-5 5" />
               </svg>
             </button>
@@ -625,80 +998,23 @@ export default function Builder() {
         </div>
       </footer>
 
-      <div className={`toast${toast ? ' show' : ''}`} role="status" aria-live="polite">
+      <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">
         {toast}
       </div>
-    </main>
-  );
-}
 
-/* ------------------------------------------------------------------ */
-/* Small helpers                                                       */
-/* ------------------------------------------------------------------ */
-
-function FragmentRow({ label, value }: { label: string; value: string }) {
-  return (
-    <>
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </>
-  );
-}
-
-function DecalThumb({ id, slug, label }: { id: string; slug: string; label: string }) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return <span className="decal-fallback">{label}</span>;
-  return <img src={decalAsset(slug)} alt={label} loading="lazy" onError={() => setFailed(true)} />;
-}
-
-function EngravingInput({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="engraving-field">
-      <label htmlFor={id}>
-        {label} <span>{value.length} / {ENGRAVING_MAX_CHARS}</span>
-      </label>
-      <input
-        id={id}
-        type="text"
-        maxLength={ENGRAVING_MAX_CHARS}
-        autoComplete="off"
-        spellCheck={false}
-        placeholder={label === 'Top row' ? 'engraving 1' : 'engraving 2'}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+      <CartDrawer
+        open={cartOpen}
+        items={cart}
+        onClose={() => setCartOpen(false)}
+        onChangeQuantity={(id, quantity) =>
+          setCart((items) =>
+            quantity <= 0
+              ? items.filter((item) => item.id !== id)
+              : items.map((item) => (item.id === id ? { ...item, quantity } : item))
+          )
+        }
+        onRemove={(id) => setCart((items) => items.filter((item) => item.id !== id))}
       />
     </div>
-  );
-}
-
-function EngravingPreview({ build }: { build: BuildState }) {
-  const [imgFailed, setImgFailed] = useState(false);
-  const font = ENGRAVING_FONTS.find((f) => f.id === build.engraving.fontId) ?? ENGRAVING_FONTS[0];
-  const hasText = build.engraving.top.trim() || build.engraving.bottom.trim();
-  return (
-    <figure className="engraving-preview">
-      {!imgFailed && (
-        <img
-          src={ASSETS.backplate}
-          alt="Stainless steel backplate with original Casio engraving"
-          onError={() => setImgFailed(true)}
-        />
-      )}
-      <div className="engraving-lines" style={{ fontFamily: font.css, fontWeight: font.weight }}>
-        <span>{build.engraving.top || ' '}</span>
-        <span>{build.engraving.bottom || ' '}</span>
-      </div>
-      <figcaption>{hasText ? 'ENGRAVING PREVIEW' : 'EXAMPLE ENGRAVING'}</figcaption>
-    </figure>
   );
 }

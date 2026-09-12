@@ -1,954 +1,1938 @@
-:root {
-  --bg: #f6f6f8;
-  --surface: #ffffff;
-  --ink: #121212;
-  --ink-soft: #55555e;
-  --line: #e4e4ea;
-  --accent: #7f00ff;
-  --accent-soft: #f3e8ff;
-  --good: #108474;
-  --radius: 14px;
-  --shadow: 0 10px 30px rgba(18, 18, 18, 0.08);
-  --purchase-bar-h: 92px;
-  --font:
-    'Assistant', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
-}
+/* ------------------------------------------------------------------ *
+ * JellyLab Royale builder
+ * Design system ported from the original storefront stylesheet.
+ * ------------------------------------------------------------------ */
 
-* {
-  box-sizing: border-box;
+@font-face {
+  font-family: 'JellyLab Engraving';
+  src: url('https://jellylabwatches.com/cdn/shop/t/9/assets/jellylab-LiberationSans-Bold.ttf?v=176841402872383988591788989289')
+    format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JellyLab Engraving Serif';
+  src: url('https://jellylabwatches.com/cdn/shop/t/9/assets/jellylab-LiberationSerif-Bold.ttf?v=117273945954138768891788989291')
+    format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JellyLab Engraving Mono';
+  src: url('https://jellylabwatches.com/cdn/shop/t/9/assets/jellylab-LiberationMono-Bold.ttf?v=29339701234796781821788989289')
+    format('truetype');
+  font-weight: 700;
+  font-display: swap;
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
+  background: #fff;
 }
 
-body {
-  font-family: var(--font);
-  font-size: 15px;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
+.jellylab-royale-builder {
+  --ink: #1c1a20;
+  --muted: #807b8b;
+  --line: #e8e4ee;
+  --purple: #7040da;
+  --purple-dark: #5c2fbb;
+  --purple-pale: #f5f0ff;
+  --mat-blue: #347bab;
+  --selection: #245b7b;
+  --selection-pale: #edf4f9;
+  --selection-hover: #8ab2cf;
+  --selection-focus: #488ab5;
+  --surface: #f6f5f8;
+  --radius: 12px;
+  color-scheme: light;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   color: var(--ink);
-  background: var(--bg);
+  font-synthesis: none;
+  display: block;
+  isolation: isolate;
+  margin: 0;
+  background: #fff;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-align: left;
 }
 
-button {
+.jellylab-royale-builder * {
+  box-sizing: border-box;
+}
+
+/*
+ * The purchase bar is fixed and, on narrow layouts, the preview is sticky.
+ * Anything the browser may scroll into view — a focused control, an anchor,
+ * a `scrollIntoView` — has to clear both, or it lands underneath and stops
+ * being tappable. `--sticky-preview` is published by the builder.
+ */
+.jellylab-royale-builder :is(section, fieldset, button, label, input, .window-option) {
+  scroll-margin-bottom: 124px;
+}
+.jellylab-royale-builder button,
+.jellylab-royale-builder a,
+.jellylab-royale-builder input {
+  touch-action: manipulation;
+}
+.jellylab-royale-builder button {
   font: inherit;
   color: inherit;
   cursor: pointer;
+  background: none;
+  border: 0;
+}
+.jellylab-royale-builder button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.jellylab-royale-builder button:focus-visible,
+.jellylab-royale-builder a:focus-visible,
+.jellylab-royale-builder [tabindex]:focus-visible {
+  outline: 3px solid var(--selection-focus);
+  outline-offset: 4px;
+}
+.jellylab-royale-builder a {
+  color: inherit;
+  text-decoration: none;
+}
+.jellylab-royale-builder svg {
+  display: block;
+}
+.jellylab-royale-builder button > svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jellylab-royale-builder h1,
+.jellylab-royale-builder h2,
+.jellylab-royale-builder h3,
+.jellylab-royale-builder button,
+.jellylab-royale-builder input {
+  font-family: inherit;
 }
 
-input {
-  font: inherit;
-}
+/* ---------------------------------------------------------- topbar */
 
-.builder-loading {
+.jellylab-royale-builder .topbar {
+  height: 76px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 0 max(32px, calc((100vw - 1344px) / 2));
+  background: #fff;
+}
+.jellylab-royale-builder .brand {
+  font-size: 27px;
+  letter-spacing: -1.3px;
+  font-weight: 850;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.jellylab-royale-builder .brand-star {
+  color: var(--purple);
+  font-size: 29px;
+  line-height: 1;
+}
+.jellylab-royale-builder .topbar-product {
+  font-size: 14px;
+  color: var(--muted);
+  border-left: 1px solid var(--line);
+  padding-left: 22px;
+}
+.jellylab-royale-builder .prototype-pill {
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 3px 9px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.jellylab-royale-builder .cart-trigger {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 0 10px 16px;
+}
+.jellylab-royale-builder .cart-icon {
+  display: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jellylab-royale-builder .cart-count {
+  font-size: 12px;
+  color: var(--purple);
+  background: var(--purple-pale);
+  min-width: 23px;
+  height: 23px;
   display: grid;
   place-items: center;
-  min-height: 60vh;
-  color: var(--ink-soft);
+  border-radius: 50%;
 }
 
-/* ---------------------------------------------------------------- */
-/* Layout                                                            */
-/* ---------------------------------------------------------------- */
+/* ---------------------------------------------------------- layout */
 
-.builder {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 16px calc(var(--purchase-bar-h) + 40px);
+.jellylab-royale-builder .builder {
+  max-width: 1344px;
+  margin: 40px auto 0;
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: 28px;
-  align-items: start;
+  grid-template-columns: minmax(0, 0.91fr) minmax(0, 1.09fr);
+  gap: 64px;
+  padding: 0 24px 132px;
 }
-
-@media (max-width: 899px) {
-  .builder {
-    grid-template-columns: 1fr;
-  }
-}
-
-.preview-sticky {
+.jellylab-royale-builder .preview-sticky {
   position: sticky;
-  top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  top: 26px;
 }
 
-@media (max-width: 899px) {
-  .preview-sticky {
-    position: static;
-  }
-}
+/* ---------------------------------------------------------- preview */
 
-/* ---------------------------------------------------------------- */
-/* Preview card                                                      */
-/* ---------------------------------------------------------------- */
-
-.preview-card {
+.jellylab-royale-builder .preview-card {
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 14px 14px 10px;
+  padding: 18px;
+  border-radius: 24px;
 }
-
-.preview-topline {
+.jellylab-royale-builder .preview-topline {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  justify-content: space-between;
+  padding: 1px 5px 14px;
+  gap: 12px;
+  flex-wrap: wrap;
+  row-gap: 8px;
 }
-
-.eyebrow {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+.jellylab-royale-builder .eyebrow {
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+  margin: 0;
+  color: #68616f;
 }
-
-.made-to-order {
-  display: inline-flex;
+.jellylab-royale-builder .made-to-order {
+  color: #6d6877;
+  font-size: 12px;
+  display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: var(--good);
-  font-weight: 600;
-  white-space: nowrap;
+  margin-left: auto;
 }
-
-.watch-stage {
+.jellylab-royale-builder .made-to-order svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  fill: none;
+  stroke: var(--selection);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jellylab-royale-builder .watch-stage {
   position: relative;
-  width: min(100%, 420px);
-  margin: 0 auto;
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
   aspect-ratio: 1033 / 1470;
-  user-select: none;
+  max-height: calc(100vh - 202px);
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
-.watch-stage img.layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-.layer-darken {
-  filter: brightness(0.45) saturate(0.4);
-}
-
-.layer-gold-tint {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(closest-side at 50% 45%, rgba(196, 148, 66, 0.38), transparent 72%);
-  mix-blend-mode: color;
-}
-
-.watch-hotspots {
+.jellylab-royale-builder .watch-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
-
-.hotspot {
-  cursor: pointer;
+.jellylab-royale-builder .watch-hotspots path {
   fill: transparent;
-  stroke: transparent;
-  stroke-width: 5;
-  transition: stroke 0.15s ease;
+  cursor: pointer;
+  pointer-events: all;
+  outline: none;
 }
-
-.hotspot:hover {
-  stroke: rgba(127, 0, 255, 0.45);
+.jellylab-royale-builder .watch-hotspots path:hover {
+  fill: #1849670f;
 }
-
-.hotspot.active {
-  stroke: var(--accent);
-  stroke-dasharray: 14 10;
+.jellylab-royale-builder .watch-hotspots path:focus-visible {
+  stroke: var(--selection);
+  stroke-width: 3;
+  stroke-dasharray: 8 5;
+  fill: #18496712;
 }
-
-.hotspot-num {
-  fill: #fff;
-  font-size: 30px;
-  font-weight: 700;
-  paint-order: stroke;
-  stroke: rgba(0, 0, 0, 0.55);
-  stroke-width: 5;
-  pointer-events: none;
-}
-
-.preview-caption {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px 12px;
-  margin-top: 8px;
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-
-.active-caption {
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.review-star {
-  color: #fbcd0a;
-}
-
-/* ---------------------------------------------------------------- */
-/* Build summary                                                     */
-/* ---------------------------------------------------------------- */
-
-.build-summary {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-
-.summary-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.text-button {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--accent);
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.text-button:hover {
-  text-decoration: underline;
-}
-
-.build-summary dl {
-  margin: 0;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 16px;
-  font-size: 13.5px;
-}
-
-.build-summary dt {
-  color: var(--ink-soft);
-}
-
-.build-summary dd {
-  margin: 0;
-  font-weight: 600;
-  text-align: right;
-}
-
-/* ---------------------------------------------------------------- */
-/* Controls column                                                   */
-/* ---------------------------------------------------------------- */
-
-.builder-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.builder-logo {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  object-fit: contain;
-  background: var(--accent-soft);
-}
-
-.builder-heading h1 {
-  font-size: clamp(1.35rem, 3.5vw, 1.8rem);
-  margin: 0;
-  line-height: 1.15;
-}
-
-.builder-proof {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin: 14px 0 4px;
-  padding: 12px 14px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
-.proof-item {
-  display: flex;
-  flex-direction: column;
-  min-width: 110px;
-}
-
-.proof-item strong {
-  font-size: 15px;
-}
-
-.proof-item span {
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.proof-star {
-  color: #fbcd0a;
-}
-
-/* ---------------------------------------------------------------- */
-/* Option sections                                                   */
-/* ---------------------------------------------------------------- */
-
-.option-section {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-top: 16px;
-}
-
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.section-heading h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-  margin: 0;
-}
-
-.step {
-  display: inline-grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--ink);
-  color: #fff;
-  font-size: 12.5px;
-  font-weight: 700;
-}
-
-.selection-label {
-  font-size: 13px;
-  color: var(--ink-soft);
-  text-align: right;
-}
-
-.included-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--good);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-/* Chip grids (case / band / box) */
-.choice-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
-}
-
-.choice {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg);
-  border: 2px solid var(--line);
-  border-radius: 12px;
-  text-align: left;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.choice:hover {
-  border-color: #c9b3ec;
-}
-
-.choice.selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.choice .swatch {
-  flex: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-}
-
-.choice .choice-label {
-  font-size: 13.5px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.choice .choice-sub {
-  display: block;
-  font-size: 11.5px;
-  font-weight: 400;
-  color: var(--ink-soft);
-}
-
-/* Window tabs */
-.window-options {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-.window-tab {
-  padding: 10px 6px;
-  border: 2px solid var(--line);
-  border-radius: 10px;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.window-tab.selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.window-tab .num {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--ink-soft);
-}
-
-.window-tab .dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  background: repeating-conic-gradient(#e8e8ee 0 25%, #fff 0 50%) 50% / 8px 8px;
-}
-
-.window-description {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 10px 2px 4px;
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-.window-description strong {
-  color: var(--ink);
-}
-
-fieldset.filter-fieldset,
-fieldset.decal-fieldset {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  margin: 12px 0 0;
-  padding: 12px;
-}
-
-fieldset legend {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: var(--ink-soft);
-  padding: 0 6px;
-}
-
-fieldset legend span {
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-.color-options,
-.gradient-options,
-.decal-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.filter-chip {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.12);
-  position: relative;
-  transition: transform 0.12s ease, border-color 0.12s ease;
-}
-
-.filter-chip:hover {
-  transform: scale(1.08);
-}
-
-.filter-chip.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-.filter-chip .uv {
+.jellylab-royale-builder .image-loading {
   position: absolute;
-  right: -4px;
-  top: -4px;
-  font-size: 8.5px;
-  font-weight: 800;
-  background: var(--ink);
-  color: #fff;
-  border-radius: 6px;
-  padding: 1px 3px;
-}
-
-.decal-chip {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  border: 2px solid var(--line);
-  background: var(--bg);
+  inset: 0;
   display: grid;
   place-items: center;
-  overflow: hidden;
-  padding: 4px;
-}
-
-.decal-chip img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.decal-chip.selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.decal-chip .decal-fallback {
-  font-size: 9px;
+  padding: 20px;
   text-align: center;
-  color: var(--ink-soft);
-  line-height: 1.1;
-}
-
-.decal-finish {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-.pill-group {
-  display: inline-flex;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.pill-group button {
-  border: none;
-  background: var(--surface);
-  padding: 5px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-}
-
-.pill-group button.selected {
-  background: var(--ink);
-  color: #fff;
-}
-
-.window-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.outline-button {
-  border: 1.5px solid var(--ink);
-  border-radius: 999px;
-  background: none;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.outline-button:hover {
-  background: var(--ink);
-  color: #fff;
-}
-
-.clear-button {
-  color: var(--ink-soft);
-}
-
-/* Optional services */
-.service-toggle {
-  border: 1.5px solid var(--accent);
-  color: var(--accent);
-  background: none;
-  border-radius: 999px;
-  padding: 5px 16px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.service-toggle[aria-expanded='true'] {
-  background: var(--accent);
-  color: #fff;
-}
-
-.service-heading-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.removal-help,
-.engraving-help {
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin: 4px 0 12px;
-}
-
-.removal-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.removal-chip {
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
-  background: var(--bg);
-  padding: 6px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-}
-
-.removal-chip.selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.engraving-font-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.font-chip {
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
-  background: var(--bg);
-  padding: 8px 14px;
+  background: #fff;
+  color: var(--muted);
   font-size: 14px;
 }
-
-.font-chip.selected {
-  border-color: var(--accent);
-  background: var(--accent-soft);
+.jellylab-royale-builder .preview-logo {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  width: 56px;
+  height: 56px;
+  pointer-events: none;
+  user-select: none;
 }
-
-.engraving-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 12px;
+.jellylab-royale-builder .preview-logo-spin {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: jellylab-logo-turn 30s linear infinite;
 }
-
-@media (max-width: 560px) {
-  .engraving-fields {
-    grid-template-columns: 1fr;
+@keyframes jellylab-logo-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
-
-.engraving-field label {
+.jellylab-royale-builder .preview-caption {
   display: flex;
   justify-content: space-between;
-  font-size: 12.5px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.engraving-field label span {
-  color: var(--ink-soft);
-  font-weight: 500;
-}
-
-.engraving-field input {
-  width: 100%;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 12px;
-  background: var(--bg);
-}
-
-.engraving-field input:focus {
-  outline: 2px solid var(--accent);
-  border-color: transparent;
-}
-
-.engraving-limits {
+  align-items: baseline;
+  gap: 12px;
   font-size: 12px;
-  color: var(--ink-soft);
-  margin: 8px 0 0;
+  color: #8a8295;
+  padding: 14px 5px 0;
+}
+.jellylab-royale-builder .active-caption {
+  color: var(--selection);
+  font-weight: 600;
+}
+.jellylab-royale-builder .preview-mobile-proof {
+  display: none;
+}
+.jellylab-royale-builder .review-star {
+  color: #d69b15;
 }
 
-.engraving-preview {
-  margin: 14px 0 0;
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  background: radial-gradient(circle at 35% 30%, #b9bec6, #6f757e 70%);
-  aspect-ratio: 2 / 1;
+/* ---------------------------------------------------------- summary */
+
+.jellylab-royale-builder .build-summary {
+  margin: 23px 4px 0;
+}
+.jellylab-royale-builder .summary-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 15px;
+}
+.jellylab-royale-builder .text-button {
+  font-size: 13px;
+  color: var(--purple);
+  padding: 0;
+  font-weight: 550;
+}
+.jellylab-royale-builder .text-button:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.jellylab-royale-builder .build-summary dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 126px minmax(0, 1fr);
+  gap: 5px 15px;
+  font-size: 13px;
+}
+.jellylab-royale-builder .build-summary dt {
+  color: var(--muted);
+}
+.jellylab-royale-builder .build-summary dd {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* ---------------------------------------------------------- intro */
+
+.jellylab-royale-builder .intro {
+  padding: 0 0 24px;
+}
+.jellylab-royale-builder .builder-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+.jellylab-royale-builder .builder-logo {
   display: block;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+.jellylab-royale-builder h1 {
+  font-size: 36px;
+  letter-spacing: -1.5px;
+  line-height: 1.2;
+  margin: 0;
+  min-width: 0;
+  font-weight: 800;
+}
+.jellylab-royale-builder h1 > span,
+.jellylab-royale-builder .cart-header h2 > span {
+  color: var(--purple);
+}
+.jellylab-royale-builder .intro p {
+  margin: 0;
+  color: #757080;
+  font-size: 15px;
+  line-height: 1.65;
+}
+.jellylab-royale-builder .builder-proof {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr 1.2fr;
+  gap: 16px;
+  margin-top: 18px;
+}
+.jellylab-royale-builder .proof-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.jellylab-royale-builder .proof-item + .proof-item {
+  border-left: 1px solid var(--line);
+  padding-left: 16px;
+}
+.jellylab-royale-builder .proof-item strong {
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--ink);
+  font-weight: 750;
+  white-space: nowrap;
+}
+.jellylab-royale-builder .proof-item > span {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.jellylab-royale-builder .proof-star {
+  color: var(--mat-blue);
+}
+.jellylab-royale-builder .build-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
 }
 
-.engraving-preview img {
+/* ---------------------------------------------------------- sections */
+
+.jellylab-royale-builder .option-section {
+  padding: 23px 0;
+  border-top: 1px solid var(--line);
+}
+.jellylab-royale-builder .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+.jellylab-royale-builder .section-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 20px;
+  font-weight: 740;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+.jellylab-royale-builder .step {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #6097bc;
+  color: #102d42;
+  letter-spacing: 0;
+  width: 23px;
+  height: 23px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.jellylab-royale-builder .selection-label {
+  font-size: 13px;
+  color: #655a77;
+  text-align: right;
+}
+.jellylab-royale-builder .included-label {
+  font-size: 12px;
+  color: #8b8297;
+}
+
+/* ---------------------------------------------------------- choices */
+
+.jellylab-royale-builder .choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+.jellylab-royale-builder .choice {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 10px;
+  padding: 11px 10px;
+  border: 1px solid #e0dce8;
+  background: #fff;
+  border-radius: var(--radius);
+  min-height: 67px;
+  position: relative;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.jellylab-royale-builder .choice:hover {
+  border-color: var(--selection-hover);
+  background: var(--selection-pale);
+}
+.jellylab-royale-builder .choice[aria-checked='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+  box-shadow: inset 0 0 0 0.25px var(--selection);
+}
+.jellylab-royale-builder .choice[aria-checked='true']::after {
+  content: '✓';
+  position: absolute;
+  right: 6px;
+  top: 3px;
+  font-size: 12px;
+  color: var(--selection);
+  font-weight: 700;
+}
+.jellylab-royale-builder .material-swatch {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #0002;
+  box-shadow: inset 0 0 0 2px #ffffff65;
+  border-radius: 50%;
+}
+.jellylab-royale-builder .band-grid .material-swatch {
+  border-radius: 8px;
+}
+.jellylab-royale-builder .choice-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jellylab-royale-builder .choice-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.jellylab-royale-builder .choice-description {
+  font-size: 12px;
+  color: #92879f;
+  line-height: 1.3;
+}
+.jellylab-royale-builder .box-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.jellylab-royale-builder .box-grid .choice {
+  padding: 10px 8px;
+  gap: 7px;
+  min-height: 58px;
+}
+.jellylab-royale-builder .box-grid .choice-name {
+  font-size: 12px;
+}
+.jellylab-royale-builder .box-grid .material-swatch {
+  width: 25px;
+  height: 25px;
+}
+
+/* ---------------------------------------------------------- windows */
+
+.jellylab-royale-builder .window-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+.jellylab-royale-builder .window-option {
+  border: 1px solid #e0dce8;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 4px 10px;
+  position: relative;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+}
+.jellylab-royale-builder .window-option:hover {
+  border-color: var(--selection-hover);
+}
+.jellylab-royale-builder .window-option[aria-pressed='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+  box-shadow: inset 0 0 0 0.25px var(--selection);
+}
+.jellylab-royale-builder .window-option svg {
+  height: 46px;
+  width: 58px;
+  stroke: none;
+  fill: none;
+}
+.jellylab-royale-builder .window-option > span {
+  font-size: 12px;
+  font-weight: 650;
+}
+.jellylab-royale-builder .window-filter-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #0002;
+}
+.jellylab-royale-builder .window-decal-dot {
+  object-fit: cover;
+  overflow: hidden;
+}
+.jellylab-royale-builder .window-description {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #948b9e;
+  margin: 12px 0 21px;
+}
+.jellylab-royale-builder .current-filter {
+  color: var(--selection);
+}
+
+/* ---------------------------------------------------------- filters */
+
+.jellylab-royale-builder .filter-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.jellylab-royale-builder .filter-fieldset legend {
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 1px;
+  color: #8c809c;
+  margin-bottom: 11px;
+  padding: 0;
+}
+.jellylab-royale-builder .color-options {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px 8px;
+}
+.jellylab-royale-builder .color-option {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 1px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+}
+.jellylab-royale-builder .color-option:hover {
+  background: var(--surface);
+}
+.jellylab-royale-builder .color-option[aria-checked='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+}
+.jellylab-royale-builder .color-disc {
+  width: 39px;
+  height: 39px;
+  display: block;
+  border-radius: 50%;
+  border: 1px solid #0002;
+  box-shadow: inset 0 0 0 2px #ffffff85;
+  position: relative;
+}
+.jellylab-royale-builder .color-option[aria-checked='true'] .color-disc::after {
+  content: '✓';
+  display: grid;
+  place-items: center;
   position: absolute;
   inset: 0;
+  color: #fff;
+  text-shadow: 0 1px 3px #0008;
+  font-size: 15px;
+  font-weight: 700;
+}
+.jellylab-royale-builder .color-option[data-value='none'] .color-disc::after {
+  color: var(--selection);
+  text-shadow: none;
+}
+.jellylab-royale-builder .color-name {
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  color: #736880;
+}
+.jellylab-royale-builder .gradient-fieldset {
+  margin-top: 21px;
+}
+.jellylab-royale-builder .gradient-options {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+.jellylab-royale-builder .gradient-options .color-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jellylab-royale-builder .gradient-options .color-name b {
+  font-weight: 600;
+}
+.jellylab-royale-builder .window-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 19px;
+}
+.jellylab-royale-builder .outline-button {
+  border: 1px solid #d9cee9;
+  border-radius: 22px;
+  padding: 8px 13px;
+  font-size: 12px;
+  color: #665079;
+  background: #fff;
+  min-height: 36px;
+}
+.jellylab-royale-builder .outline-button:hover {
+  background: var(--purple-pale);
+  border-color: var(--purple);
+}
+.jellylab-royale-builder .window-actions .outline-button[aria-pressed='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+}
+.jellylab-royale-builder .clear-button {
+  font-size: 12px;
+  color: #91839e;
+}
+
+/* ---------------------------------------------------------- decals */
+
+.jellylab-royale-builder .decal-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 22px;
+  min-width: 0;
+}
+.jellylab-royale-builder .decal-fieldset legend {
+  padding: 0;
+  margin-bottom: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  color: #82758e;
+}
+.jellylab-royale-builder .decal-fieldset legend span {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-left: 10px;
+  color: var(--muted);
+}
+.jellylab-royale-builder .decal-options {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 9px 5px;
+}
+.jellylab-royale-builder .decal-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 93px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  padding: 8px 3px 7px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.jellylab-royale-builder .decal-disc {
+  display: block;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid #c9c5ce;
+  box-shadow: inset 0 0 0 1px #ffffff80;
+}
+.jellylab-royale-builder .decal-disc img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
+}
+.jellylab-royale-builder .decal-none {
+  background: repeating-linear-gradient(45deg, #fff 0 4px, #dcdce2 4px 6px);
+}
+.jellylab-royale-builder .decal-option:hover {
+  border-color: var(--selection-hover);
+}
+.jellylab-royale-builder .decal-option[aria-checked='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+}
+.jellylab-royale-builder .decal-finish {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.jellylab-royale-builder .decal-finish-options {
+  display: flex;
+  gap: 6px;
+}
+.jellylab-royale-builder .decal-finish-option {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  padding: 8px 12px;
+}
+.jellylab-royale-builder .decal-finish-option[aria-checked='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+  color: var(--selection);
 }
 
-.engraving-lines {
-  position: absolute;
-  inset: 0;
+/* ---------------------------------------------------------- services */
+
+.jellylab-royale-builder .service-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+.jellylab-royale-builder .service-toggle {
+  font-size: 14px;
+  font-weight: 650;
+  min-height: 36px;
+  padding: 6px 0 6px 6px;
+  color: var(--selection);
+}
+.jellylab-royale-builder .optional-service[data-expanded='false'] .section-heading {
+  margin-bottom: 0;
+}
+.jellylab-royale-builder .removal-help,
+.jellylab-royale-builder .engraving-help {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #757080;
+  margin: -3px 0 15px;
+}
+.jellylab-royale-builder .removal-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+.jellylab-royale-builder .removal-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 11px;
+  min-height: 50px;
+  border: 1px solid #e0dce8;
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.jellylab-royale-builder .removal-choice:hover {
+  border-color: var(--selection-hover);
+  background: var(--selection-pale);
+}
+.jellylab-royale-builder .removal-choice[data-selected='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+}
+.jellylab-royale-builder .removal-choice input {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+  margin: 0;
+  accent-color: var(--selection);
+  cursor: pointer;
+}
+.jellylab-royale-builder .removal-choice:focus-within {
+  outline: 3px solid var(--selection-focus);
+  outline-offset: 3px;
+}
+.jellylab-royale-builder .removal-all {
+  grid-column: 1 / -1;
+  font-weight: 650;
+  min-height: 51px;
+}
+
+/* ---------------------------------------------------------- engraving */
+
+.jellylab-royale-builder .engraving-font-fieldset {
+  margin: 0 0 19px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.jellylab-royale-builder .engraving-font-fieldset legend {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 9px;
+}
+.jellylab-royale-builder .engraving-font-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.jellylab-royale-builder .engraving-font-choice {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 38%;
-  color: #2f333a;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.2em;
-  font-size: clamp(10px, 2.6vw, 15px);
-  text-transform: uppercase;
+  gap: 4px;
+  min-height: 88px;
+  padding: 10px 4px;
+  border: 1px solid #d9d3e3;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.35;
+  cursor: pointer;
+  text-align: center;
 }
-
-.engraving-preview figcaption {
+.jellylab-royale-builder .engraving-font-choice input {
   position: absolute;
-  left: 10px;
-  bottom: 8px;
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.85);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
 }
-
-/* Price breakdown */
-.price-breakdown {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-top: 16px;
+.jellylab-royale-builder .engraving-font-choice:hover {
+  border-color: var(--selection-hover);
 }
-
-.price-breakdown .row {
+.jellylab-royale-builder .engraving-font-choice[data-selected='true'] {
+  border-color: var(--selection);
+  background: var(--selection-pale);
+}
+.jellylab-royale-builder .engraving-font-choice:focus-within {
+  outline: 3px solid var(--selection-focus);
+  outline-offset: 3px;
+}
+.jellylab-royale-builder .font-sample {
+  font-family: 'JellyLab Engraving', Arial, sans-serif;
+  font-size: 29px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.jellylab-royale-builder .engraving-font-choice[data-font='serif'] .font-sample {
+  font-family: 'JellyLab Engraving Serif', Georgia, serif;
+}
+.jellylab-royale-builder .engraving-font-choice[data-font='mono'] .font-sample {
+  font-family: 'JellyLab Engraving Mono', monospace;
+}
+.jellylab-royale-builder .engraving-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.jellylab-royale-builder .engraving-field {
+  min-width: 0;
+}
+.jellylab-royale-builder .engraving-field label {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  padding: 4px 0;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.jellylab-royale-builder .engraving-field label span {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  white-space: nowrap;
+}
+.jellylab-royale-builder .engraving-field input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d9d3e3;
+  border-radius: 10px;
+  padding: 13px 12px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.4;
+  background: #fff;
+}
+.jellylab-royale-builder .engraving-field input::placeholder {
+  color: #a59bac;
   font-size: 14px;
 }
-
-.price-breakdown .total-line {
-  border-top: 1px solid var(--line);
-  margin-top: 8px;
-  padding-top: 10px;
-  font-size: 16px;
+.jellylab-royale-builder .engraving-field input:focus {
+  outline: 2px solid var(--selection-focus);
+  outline-offset: 2px;
+  border-color: var(--selection);
 }
-
-.price-breakdown .note {
+.jellylab-royale-builder .engraving-limits {
   font-size: 12px;
-  color: var(--ink-soft);
+  line-height: 1.5;
+  color: #85788f;
   margin: 10px 0 0;
 }
-
-.terms-check {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  margin-top: 14px;
-  font-size: 13px;
-  color: var(--ink-soft);
+.jellylab-royale-builder .engraving-preview {
+  position: relative;
+  margin: 18px 0 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  overflow: hidden;
 }
-
-.terms-check input {
-  margin-top: 3px;
-  accent-color: var(--accent);
-}
-
-/* ---------------------------------------------------------------- */
-/* Purchase bar                                                      */
-/* ---------------------------------------------------------------- */
-
-.purchase-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 40;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--line);
-}
-
-.purchase-inner {
-  max-width: 1200px;
+.jellylab-royale-builder .engraving-preview svg {
+  display: block;
+  width: 100%;
+  max-width: 390px;
+  height: auto;
+  aspect-ratio: 1;
   margin: 0 auto;
-  padding: 10px 16px;
+}
+.jellylab-royale-builder .engraving-preview figcaption {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  min-height: var(--purchase-bar-h);
+  gap: 14px;
+  font-size: 12px;
+  letter-spacing: 0.7px;
+  font-weight: 600;
+  color: #92849e;
+  padding: 0 17px 15px;
+  min-height: 30px;
+}
+.jellylab-royale-builder .engraving-preview .text-button {
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.purchase-summary {
+/* ---------------------------------------------------------- price */
+
+.jellylab-royale-builder .price-breakdown {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  font-size: 13px;
+}
+.jellylab-royale-builder .price-breakdown > div,
+.jellylab-royale-builder .upgrade-price {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+.jellylab-royale-builder .price-breakdown > div {
+  margin-bottom: 9px;
+}
+.jellylab-royale-builder .upgrade-prices {
+  display: block;
+  color: #716978;
+}
+.jellylab-royale-builder .upgrade-price {
+  margin-bottom: 7px;
+}
+.jellylab-royale-builder .price-breakdown .total-line {
+  border-top: 1px dashed var(--line);
+  margin-top: 15px;
+  padding-top: 14px;
+  align-items: baseline;
+  font-size: 15px;
+}
+.jellylab-royale-builder .total-line strong:last-child {
+  font-size: 26px;
+  letter-spacing: -0.5px;
+}
+.jellylab-royale-builder .total-line strong > span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+.jellylab-royale-builder .price-breakdown p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 7px 0 0;
+}
+
+/* ---------------------------------------------------------- purchase bar */
+
+.jellylab-royale-builder .purchase-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffffed;
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+  z-index: 5;
+  padding: 14px 24px calc(14px + env(safe-area-inset-bottom));
+}
+.jellylab-royale-builder .purchase-inner {
+  max-width: 1296px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+.jellylab-royale-builder .purchase-summary {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
 }
-
-.purchase-title {
+.jellylab-royale-builder .purchase-preview {
   display: block;
+  width: 48px;
+  flex: 0 0 48px;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.jellylab-royale-builder .purchase-preview svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.jellylab-royale-builder .purchase-price {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.jellylab-royale-builder .purchase-title {
   font-size: 12px;
-  color: var(--ink-soft);
+  color: #8e839b;
 }
-
-.purchase-price strong {
-  font-size: 18px;
+.jellylab-royale-builder .purchase-price strong {
+  font-size: 27px;
+  font-weight: 750;
+  letter-spacing: -0.8px;
+  line-height: 1.2;
 }
-
-.purchase-note {
+.jellylab-royale-builder .purchase-price small {
+  font-weight: 500;
   font-size: 12px;
-  color: var(--ink-soft);
-  display: none;
+  color: #8e839b;
+  letter-spacing: 0;
+  margin-left: 5px;
 }
-
-@media (min-width: 900px) {
-  .purchase-note {
-    display: block;
-  }
+.jellylab-royale-builder .purchase-note {
+  display: block;
+  max-width: 260px;
+  margin: 0 0 0 auto;
+  text-align: right;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
 }
-
-.purchase-actions {
+.jellylab-royale-builder .purchase-note > span {
+  display: block;
+}
+.jellylab-royale-builder .purchase-note a {
+  color: var(--selection);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 650;
+}
+.jellylab-royale-builder .purchase-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
+  flex-shrink: 0;
+}
+.jellylab-royale-builder .purchase-shipping {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 2px;
+  max-width: 125px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #6d6379;
+}
+.jellylab-royale-builder .purchase-shipping strong {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+}
+.jellylab-royale-builder .purchase-shipping[data-unlocked='true'] strong {
+  color: var(--selection);
+}
+.jellylab-royale-builder .primary-button {
+  background: var(--purple);
+  color: #fff;
+  font-weight: 650;
+  font-size: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  padding: 15px 24px;
+  border-radius: 11px;
+  transition: background 0.15s, transform 0.15s;
+}
+.jellylab-royale-builder .primary-button:hover {
+  background: var(--purple-dark);
+}
+.jellylab-royale-builder .primary-button:active {
+  transform: scale(0.98);
+}
+.jellylab-royale-builder .add-button {
+  min-width: 240px;
+  justify-content: space-between;
 }
 
-.purchase-shipping {
-  text-align: right;
-  font-size: 11.5px;
-  color: var(--ink-soft);
-  display: none;
+/* ---------------------------------------------------------- toast */
+
+.jellylab-royale-builder .toast {
+  position: fixed;
+  bottom: 110px;
+  left: 50%;
+  transform: translate(-50%, 12px);
+  background: #24202c;
+  color: #fff;
+  border-radius: 10px;
+  padding: 11px 19px;
+  font-size: 13px;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  max-width: 90vw;
+  text-align: center;
+}
+.jellylab-royale-builder .toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
-@media (min-width: 640px) {
-  .purchase-shipping {
-    display: block;
+/* ---------------------------------------------------------- cart */
+
+.jellylab-royale-builder .cart-dialog {
+  border: 0;
+  border-left: 1px solid var(--line);
+  margin: 0 0 0 auto;
+  padding: 0;
+  width: min(570px, 100%);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100%;
+  background: #fff;
+  color: var(--ink);
+  overflow: hidden;
+  font-family: inherit;
+}
+.jellylab-royale-builder .cart-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: drawer-in 0.18s ease-out;
+}
+.jellylab-royale-builder .cart-dialog::backdrop {
+  background: #17102059;
+  backdrop-filter: blur(3px);
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.jellylab-royale-builder .cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 26px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.jellylab-royale-builder .cart-header h2 {
+  font-size: 30px;
+  margin: 5px 0 0;
+  letter-spacing: -1px;
+}
+.jellylab-royale-builder .icon-button {
+  font-size: 30px;
+  width: 38px;
+  height: 38px;
+  color: #8a7f95;
+  border-radius: 50%;
+  line-height: 1;
+}
+.jellylab-royale-builder .icon-button:hover {
+  background: var(--surface);
+}
+.jellylab-royale-builder .cart-content {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 26px;
+}
+.jellylab-royale-builder .cart-item {
+  padding: 23px 0;
+  border-bottom: 1px solid var(--line);
+}
+.jellylab-royale-builder .cart-item-main {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  gap: 18px;
+}
+.jellylab-royale-builder .cart-previews {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+.jellylab-royale-builder .cart-thumbnail,
+.jellylab-royale-builder .cart-backplate {
+  display: block;
+  width: 100%;
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.jellylab-royale-builder .cart-backplate {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.jellylab-royale-builder .cart-thumbnail svg,
+.jellylab-royale-builder .cart-backplate svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.jellylab-royale-builder .cart-item-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.jellylab-royale-builder .cart-item-heading h3 {
+  font-size: 15px;
+  line-height: 1.3;
+  margin: 0 0 7px;
+  font-weight: 700;
+}
+.jellylab-royale-builder .cart-item-heading strong {
+  font-size: 16px;
+  white-space: nowrap;
+}
+.jellylab-royale-builder .cart-build-code {
+  font-size: 12px;
+  letter-spacing: 0.7px;
+  color: #9d91a9;
+  font-weight: 400;
+}
+.jellylab-royale-builder .cart-item-details {
+  margin: 10px 0 0;
+  display: grid;
+  /* Wide enough for the longest label ("Engraving · bottom") to stay on one line. */
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 4px 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.jellylab-royale-builder .cart-item-details dt {
+  color: #90839e;
+}
+.jellylab-royale-builder .cart-item-details dd {
+  margin: 0;
+  align-self: start;
+  color: #54485f;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.jellylab-royale-builder .cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 16px;
+}
+.jellylab-royale-builder .quantity-control {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+.jellylab-royale-builder .quantity-control button {
+  width: 27px;
+  height: 28px;
+  font-size: 17px;
+}
+.jellylab-royale-builder .quantity-control span {
+  min-width: 23px;
+  text-align: center;
+}
+.jellylab-royale-builder .remove-item {
+  margin-left: auto;
+  color: #a291af;
+}
+.jellylab-royale-builder .cart-upgrades {
+  font-size: 12px;
+  color: #897696;
+  margin-top: 11px;
+  line-height: 1.65;
+}
+.jellylab-royale-builder .cart-footer {
+  padding: 20px 26px 24px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.jellylab-royale-builder .cart-subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 650;
+}
+.jellylab-royale-builder .cart-subtotal strong {
+  font-size: 26px;
+}
+.jellylab-royale-builder .cart-tax-note {
+  font-size: 12px;
+  color: #94869f;
+  margin: 5px 0 17px;
+}
+.jellylab-royale-builder .checkout-button {
+  width: 100%;
+  justify-content: space-between;
+}
+.jellylab-royale-builder .demo-note {
+  text-align: center;
+  font-size: 12px;
+  color: #9b8ca8;
+  margin: 13px 0 0;
+}
+.jellylab-royale-builder .empty-cart {
+  padding: 65px 10px;
+  text-align: center;
+}
+.jellylab-royale-builder .empty-cart h3 {
+  font-size: 23px;
+  letter-spacing: -0.7px;
+  margin: 0 0 10px;
+}
+.jellylab-royale-builder .empty-cart p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.jellylab-royale-builder .empty-cart button {
+  margin: 25px auto 0;
+}
+.jellylab-royale-builder .checkout-summary {
+  padding: 24px 0;
+}
+.jellylab-royale-builder .checkout-summary h3 {
+  font-size: 24px;
+  letter-spacing: -0.7px;
+  margin: 0 0 12px;
+}
+.jellylab-royale-builder .checkout-summary > p {
+  font-size: 14px;
+  color: #85768f;
+  line-height: 1.7;
+}
+.jellylab-royale-builder .checkout-order {
+  margin-top: 24px;
+  padding: 18px;
+  background: var(--surface);
+  border-radius: 12px;
+}
+.jellylab-royale-builder .checkout-order div {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  font-size: 14px;
+  margin: 10px 0;
+}
+.jellylab-royale-builder .checkout-order .checkout-total {
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+  margin-top: 15px;
+  font-weight: 700;
+}
+.jellylab-royale-builder .checkout-summary .outline-button {
+  margin-top: 24px;
+}
+
+/* ---------------------------------------------------------- responsive */
+
+@media (min-width: 1450px) {
+  .jellylab-royale-builder .watch-stage {
+    max-height: 730px;
+  }
+  .jellylab-royale-builder .builder {
+    gap: 74px;
+    margin-top: 45px;
+  }
+  .jellylab-royale-builder .preview-sticky {
+    top: 30px;
   }
 }
 
-.purchase-shipping strong {
-  display: block;
-  font-size: 12.5px;
-  color: var(--ink);
+@media (max-width: 1150px) {
+  .jellylab-royale-builder .builder {
+    gap: 34px;
+    margin-top: 30px;
+    grid-template-columns: minmax(0, 0.87fr) minmax(0, 1.13fr);
+  }
+  .jellylab-royale-builder .topbar {
+    padding: 0 26px;
+  }
+  .jellylab-royale-builder .preview-card {
+    padding: 13px;
+  }
+  .jellylab-royale-builder .choice {
+    gap: 7px;
+    padding: 10px 7px;
+  }
+  .jellylab-royale-builder .choice-name,
+  .jellylab-royale-builder .choice-description {
+    font-size: 12px;
+  }
+  .jellylab-royale-builder .material-swatch {
+    width: 27px;
+    height: 27px;
+  }
+  .jellylab-royale-builder .box-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .jellylab-royale-builder .build-summary dl {
+    font-size: 12px;
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+  .jellylab-royale-builder h1 {
+    font-size: 32px;
+  }
+  .jellylab-royale-builder .color-options {
+    gap: 8px 3px;
+  }
+  .jellylab-royale-builder .color-disc {
+    width: 35px;
+    height: 35px;
+  }
+  .jellylab-royale-builder .decal-options {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 }
 
-.purchase-shipping[data-unlocked='true'] strong {
-  color: var(--good);
+@media (max-width: 820px) {
+  .jellylab-royale-builder .builder {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 650px;
+    gap: 30px;
+    row-gap: 10px;
+    padding: 0 20px 125px;
+    margin-top: 24px;
+  }
+  .jellylab-royale-builder .preview-column {
+    display: contents;
+  }
+  .jellylab-royale-builder .preview-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    order: 0;
+    background: #fff;
+    padding-bottom: 6px;
+    /* Reads as a layer, so controls scrolling under it don't look clipped. */
+    box-shadow: 0 11px 12px -10px rgba(28, 26, 32, 0.22);
+  }
+  .jellylab-royale-builder .controls-column {
+    order: 1;
+  }
+  .jellylab-royale-builder :is(section, fieldset, button, label, input, .window-option) {
+    scroll-margin-top: calc(var(--sticky-preview, 0px) + 12px);
+  }
+  .jellylab-royale-builder .watch-stage {
+    max-height: 38vh;
+    min-height: 0;
+    aspect-ratio: 1033 / 1300;
+    width: min(100%, calc(38vh * 0.795));
+    margin: 0 auto;
+  }
+  .jellylab-royale-builder .build-summary {
+    display: none;
+  }
+  .jellylab-royale-builder .preview-card {
+    padding: 10px;
+  }
+  .jellylab-royale-builder .preview-topline {
+    padding-bottom: 8px;
+  }
+  .jellylab-royale-builder .preview-logo {
+    width: 40px;
+    height: 40px;
+    top: 10px;
+    left: 10px;
+  }
+  .jellylab-royale-builder .controls-column .case-section {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .jellylab-royale-builder .intro {
+    padding-bottom: 21px;
+  }
+  .jellylab-royale-builder .intro p {
+    max-width: 430px;
+  }
+  .jellylab-royale-builder .preview-caption .preview-instruction {
+    display: none;
+  }
+  .jellylab-royale-builder .preview-mobile-proof {
+    display: inline;
+    color: #6d6379;
+    white-space: nowrap;
+  }
+  .jellylab-royale-builder .preview-review {
+    margin-left: auto;
+  }
+  .jellylab-royale-builder .choice-name {
+    font-size: 14px;
+  }
+  .jellylab-royale-builder .choice {
+    padding: 12px 10px;
+    gap: 10px;
+    min-height: 70px;
+  }
+  .jellylab-royale-builder .material-swatch {
+    width: 32px;
+    height: 32px;
+  }
+  .jellylab-royale-builder .box-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .jellylab-royale-builder .topbar {
+    height: 66px;
+    padding: 0 20px;
+    gap: 13px;
+  }
+  .jellylab-royale-builder .topbar-product {
+    font-size: 12px;
+    border: 0;
+    padding: 0;
+  }
+  .jellylab-royale-builder .prototype-pill {
+    margin-left: auto;
+  }
+  .jellylab-royale-builder .cart-trigger {
+    margin-left: 0;
+  }
+  .jellylab-royale-builder .cart-label {
+    display: none;
+  }
+  .jellylab-royale-builder .cart-icon {
+    display: block;
+  }
+  .jellylab-royale-builder .brand {
+    font-size: 24px;
+  }
+  .jellylab-royale-builder .color-disc {
+    width: 42px;
+    height: 42px;
+  }
+  .jellylab-royale-builder .window-option > span {
+    font-size: 13px;
+  }
+  .jellylab-royale-builder .option-section {
+    padding: 24px 0;
+  }
+  .jellylab-royale-builder .window-description,
+  .jellylab-royale-builder .included-label,
+  .jellylab-royale-builder .selection-label {
+    font-size: 13px;
+  }
+  .jellylab-royale-builder .purchase-bar {
+    padding: 6px 20px max(6px, env(safe-area-inset-bottom, 0px));
+  }
+  .jellylab-royale-builder .purchase-inner {
+    gap: 16px;
+    justify-content: space-between;
+  }
+  .jellylab-royale-builder .purchase-summary {
+    gap: 8px;
+  }
+  .jellylab-royale-builder .purchase-actions {
+    gap: 10px;
+  }
+  .jellylab-royale-builder .purchase-preview {
+    width: 36px;
+    flex-basis: 36px;
+  }
+  .jellylab-royale-builder .purchase-note {
+    display: none;
+  }
+  .jellylab-royale-builder .add-button {
+    min-width: 165px;
+    min-height: 44px;
+    padding: 10px 14px;
+  }
 }
 
-.primary-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: none;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  padding: 13px 26px;
-  transition: background 0.15s ease, transform 0.1s ease;
+@media (max-width: 600px) {
+  .jellylab-royale-builder .purchase-inner {
+    display: grid;
+    grid-template-columns: 32px minmax(65px, 1fr) 70px auto;
+    gap: 0 8px;
+  }
+  .jellylab-royale-builder .purchase-summary,
+  .jellylab-royale-builder .purchase-actions {
+    display: contents;
+  }
+  .jellylab-royale-builder .purchase-preview {
+    grid-column: 1;
+    grid-row: 1;
+    width: 32px;
+  }
+  .jellylab-royale-builder .purchase-price {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .jellylab-royale-builder .purchase-shipping {
+    grid-column: 3;
+    grid-row: 1;
+    font-size: 11px;
+    gap: 1px;
+  }
+  .jellylab-royale-builder .purchase-shipping strong {
+    font-size: 11px;
+  }
+  .jellylab-royale-builder .add-button {
+    grid-column: 4;
+    grid-row: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .jellylab-royale-builder .add-button svg {
+    display: none;
+  }
+  .jellylab-royale-builder .purchase-price strong {
+    font-size: 24px;
+    white-space: nowrap;
+  }
+  .jellylab-royale-builder .purchase-price small {
+    font-size: 10px;
+    margin-left: 2px;
+  }
+  .jellylab-royale-builder .purchase-title {
+    font-size: 11px;
+    line-height: 1.2;
+  }
 }
 
-.primary-button:hover:not(:disabled) {
-  background: var(--accent);
+@media (max-width: 480px) {
+  .jellylab-royale-builder .topbar-product {
+    display: none;
+  }
+  .jellylab-royale-builder .builder {
+    padding: 0 14px 140px;
+    margin-top: 17px;
+    gap: 25px;
+  }
+  .jellylab-royale-builder .preview-card {
+    border-radius: 20px;
+  }
+  .jellylab-royale-builder .intro h1 {
+    font-size: 30px;
+  }
+  .jellylab-royale-builder .intro p {
+    font-size: 14px;
+  }
+  .jellylab-royale-builder .builder-logo {
+    flex-basis: 56px;
+    width: 56px;
+    height: 56px;
+  }
+  .jellylab-royale-builder .builder-proof {
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .jellylab-royale-builder .proof-item + .proof-item {
+    padding-left: 10px;
+  }
+  .jellylab-royale-builder .proof-item strong {
+    font-size: 14px;
+  }
+  .jellylab-royale-builder .proof-item > span {
+    font-size: 11px;
+  }
+  .jellylab-royale-builder .choice-grid {
+    gap: 8px;
+  }
+  .jellylab-royale-builder .case-grid,
+  .jellylab-royale-builder .band-grid,
+  .jellylab-royale-builder .box-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .jellylab-royale-builder .choice {
+    min-height: 65px;
+  }
+  .jellylab-royale-builder .choice-name {
+    font-size: 13px;
+  }
+  .jellylab-royale-builder .window-options {
+    gap: 7px;
+  }
+  .jellylab-royale-builder .window-option {
+    padding: 11px 2px;
+  }
+  .jellylab-royale-builder .window-option svg {
+    width: 49px;
+    height: 43px;
+  }
+  .jellylab-royale-builder .color-options {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px 7px;
+  }
+  .jellylab-royale-builder .gradient-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .jellylab-royale-builder .gradient-options .color-disc {
+    width: 43px;
+    height: 43px;
+  }
+  .jellylab-royale-builder .decal-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .jellylab-royale-builder .decal-disc {
+    flex-basis: 50px;
+    width: 50px;
+    height: 50px;
+  }
+  .jellylab-royale-builder .removal-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .jellylab-royale-builder .removal-choice {
+    min-height: 55px;
+  }
+  .jellylab-royale-builder .engraving-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .jellylab-royale-builder .engraving-section .section-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .jellylab-royale-builder .optional-service .section-heading {
+    gap: 8px;
+  }
+  .jellylab-royale-builder .optional-service .section-heading h2 {
+    font-size: 18px;
+  }
+  .jellylab-royale-builder .service-heading-actions {
+    gap: 9px;
+  }
+  .jellylab-royale-builder .service-heading-actions .selection-label {
+    font-size: 12px;
+  }
+  .jellylab-royale-builder .window-actions {
+    gap: 15px;
+    justify-content: space-between;
+  }
+  .jellylab-royale-builder .cart-header,
+  .jellylab-royale-builder .cart-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .jellylab-royale-builder .cart-content {
+    padding: 0 20px;
+  }
+  .jellylab-royale-builder .cart-item-main {
+    grid-template-columns: 95px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .jellylab-royale-builder .cart-item-heading {
+    flex-wrap: wrap;
+    gap: 0;
+  }
+  .jellylab-royale-builder .cart-item-details {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
 }
 
-.primary-button:active:not(:disabled) {
-  transform: scale(0.98);
+@media (max-width: 360px) {
+  .jellylab-royale-builder .purchase-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .jellylab-royale-builder .purchase-inner {
+    grid-template-columns: 32px minmax(65px, 1fr) 64px auto;
+    column-gap: 6px;
+  }
+  .jellylab-royale-builder .preview-caption {
+    padding-left: 1px;
+    padding-right: 1px;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .jellylab-royale-builder .purchase-price strong {
+    font-size: 22px;
+  }
 }
 
-.primary-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.primary-button svg {
-  width: 18px;
-  height: 18px;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(var(--purchase-bar-h) + 16px);
-  transform: translateX(-50%) translateY(8px);
-  background: var(--ink);
-  color: #fff;
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: 13.5px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 60;
-  max-width: min(92vw, 480px);
-  text-align: center;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.cart-error {
-  color: #c22929;
-  font-size: 13px;
-  margin: 10px 0 0;
+@media (prefers-reduced-motion: reduce) {
+  .jellylab-royale-builder *,
+  .jellylab-royale-builder .preview-logo-spin {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
