@@ -2,7 +2,7 @@
  * Catalog for the JellyLab Casio Royale builder.
  *
  * Ported from the original storefront modules (jellylab-catalog, -decals,
- * -text-removal, -engraving). Prices are USD cents. Window paths, decal
+ * -text-removal). Prices are USD cents. Window paths, decal
  * registration and text-removal bounds are the production values: they are
  * registered against the 1033 x 1470 photograph and must not be "tidied".
  */
@@ -10,8 +10,6 @@
 export const BASE_PRICE = 14_500;
 export const US_FREE_SHIPPING_THRESHOLD = 15_000;
 export const TEXT_REMOVAL_PRICE = 2_500;
-export const ENGRAVING_PRICE = 2_500;
-export const ENGRAVING_MAX_LENGTH = 25;
 
 /* ------------------------------------------------------------------ */
 /* Photograph geometry                                                 */
@@ -244,86 +242,6 @@ export function normalizeTextRemovals(value: unknown): string[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Engraving                                                           */
-/* ------------------------------------------------------------------ */
-
-export const ENGRAVING_ROWS = ['top', 'bottom'] as const;
-export type EngravingRow = (typeof ENGRAVING_ROWS)[number];
-
-export interface EngravingFont {
-  id: string;
-  name: string;
-  family: string;
-  /** Used until the Liberation face loads, and if it never does. */
-  fallback: string;
-  weight: number;
-}
-
-export const ENGRAVING_FONTS: EngravingFont[] = [
-  {
-    id: 'sans',
-    name: 'Sans serif',
-    family: 'JellyLab Engraving',
-    fallback: 'Arial, Helvetica, sans-serif',
-    weight: 700,
-  },
-  {
-    id: 'serif',
-    name: 'Serif',
-    family: 'JellyLab Engraving Serif',
-    fallback: 'Georgia, "Times New Roman", serif',
-    weight: 700,
-  },
-  {
-    id: 'mono',
-    name: 'Monospace',
-    family: 'JellyLab Engraving Mono',
-    fallback: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-    weight: 700,
-  },
-];
-
-/** The full stack a row is drawn with, face first then its own fallback. */
-export const engravingFontStack = (font: EngravingFont) =>
-  `"${font.family}", ${font.fallback}`;
-
-export const engravingFont = (id?: string) =>
-  ENGRAVING_FONTS.find((font) => font.id === id) ?? ENGRAVING_FONTS[0];
-
-export const ENGRAVING_EXAMPLES = { top: 'engraving 1', bottom: 'engraving 2' } as const;
-
-export interface Engraving {
-  top: string;
-  bottom: string;
-  font: string;
-}
-
-export function normalizeEngravingLine(value: unknown): string {
-  if (typeof value !== 'string') return '';
-  return Array.from(
-    value
-      .normalize('NFC')
-      .replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, ' ')
-      .replace(/\s+/gu, ' ')
-  )
-    .slice(0, ENGRAVING_MAX_LENGTH)
-    .join('');
-}
-
-export function normalizeEngraving(input: Partial<Engraving> | null | undefined): Engraving {
-  return {
-    top: normalizeEngravingLine(input?.top),
-    bottom: normalizeEngravingLine(input?.bottom),
-    font: engravingFont(input?.font).id,
-  };
-}
-
-export function hasEngraving(input: Partial<Engraving> | null | undefined): boolean {
-  const engraving = normalizeEngraving(input);
-  return ENGRAVING_ROWS.some((row) => engraving[row].trim().length > 0);
-}
-
-/* ------------------------------------------------------------------ */
 /* Build                                                               */
 /* ------------------------------------------------------------------ */
 
@@ -336,7 +254,6 @@ export interface Build {
   gradientLayout: GradientLayout;
   circleDecal: CircleDecal | null;
   textRemovals: string[];
-  engraving: Engraving;
 }
 
 // Starts on the black watch: the one stock pairing where nothing is an upgrade,
@@ -348,7 +265,6 @@ export const DEFAULT_BUILD: Build = {
   gradientLayout: 'separate',
   circleDecal: null,
   textRemovals: [],
-  engraving: { top: '', bottom: '', font: 'sans' },
 };
 
 export const byId = <T extends { id: string }>(items: T[], id?: string | null) =>
@@ -374,7 +290,6 @@ export function normalizeBuild(input: Partial<Build> = {}): Build {
     gradientLayout: continuous ? 'continuous' : 'separate',
     circleDecal,
     textRemovals: normalizeTextRemovals(input.textRemovals),
-    engraving: normalizeEngraving(input.engraving),
   };
 }
 
@@ -443,8 +358,6 @@ export function priceBuild(input: Partial<Build>): Pricing {
 
   if (build.textRemovals.length)
     upgrades.push({ id: 'text-removal', name: 'Text removal', price: TEXT_REMOVAL_PRICE });
-  if (hasEngraving(build.engraving))
-    upgrades.push({ id: 'laser-engraving', name: 'Laser engraving', price: ENGRAVING_PRICE });
 
   return {
     currency: 'USD',
@@ -499,9 +412,6 @@ export function buildProperties(input: Partial<Build>): Record<string, string> {
     'Text removal': b.textRemovals.length
       ? b.textRemovals.map((id) => byId(TEXT_REMOVALS, id)!.name).join(', ')
       : 'None',
-    'Engraving · top': b.engraving.top.trim() || 'None',
-    'Engraving · bottom': b.engraving.bottom.trim() || 'None',
-    'Engraving · font': hasEngraving(b.engraving) ? engravingFont(b.engraving.font).name : 'None',
   };
 }
 

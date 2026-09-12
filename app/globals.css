@@ -3,28 +3,6 @@
  * Design system ported from the original storefront stylesheet.
  * ------------------------------------------------------------------ */
 
-@font-face {
-  font-family: 'JellyLab Engraving';
-  src: url('https://jellylabwatches.com/cdn/shop/t/9/assets/jellylab-LiberationSans-Bold.ttf?v=176841402872383988591788989289')
-    format('truetype');
-  font-weight: 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'JellyLab Engraving Serif';
-  src: url('https://jellylabwatches.com/cdn/shop/t/9/assets/jellylab-LiberationSerif-Bold.ttf?v=117273945954138768891788989291')
-    format('truetype');
-  font-weight: 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'JellyLab Engraving Mono';
-  src: url('https://jellylabwatches.com/cdn/shop/t/9/assets/jellylab-LiberationMono-Bold.ttf?v=29339701234796781821788989289')
-    format('truetype');
-  font-weight: 700;
-  font-display: swap;
-}
-
 html,
 body {
   margin: 0;
@@ -47,7 +25,13 @@ body {
   --surface: #f6f5f8;
   --radius: 12px;
   color-scheme: light;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
   color: var(--ink);
   font-synthesis: none;
   display: block;
@@ -65,13 +49,14 @@ body {
 }
 
 /*
- * The purchase bar is fixed and, on narrow layouts, the preview is sticky.
- * Anything the browser may scroll into view — a focused control, an anchor,
- * a `scrollIntoView` — has to clear both, or it lands underneath and stops
- * being tappable. `--sticky-preview` is published by the builder.
+ * On narrow layouts the preview is sticky, so anything the browser may scroll
+ * into view — a focused control, an anchor, a `scrollIntoView` — has to clear
+ * it or it lands underneath and stops being tappable. `--sticky-preview` is
+ * published by the builder.
  */
-.jellylab-royale-builder :is(section, fieldset, button, label, input, .window-option) {
-  scroll-margin-bottom: 124px;
+.jellylab-royale-builder
+  :is(section, fieldset, button, label, input, .window-option) {
+  scroll-margin-bottom: 24px;
 }
 .jellylab-royale-builder button,
 .jellylab-royale-builder a,
@@ -117,86 +102,15 @@ body {
 .jellylab-royale-builder button,
 .jellylab-royale-builder input {
   font-family: inherit;
-}
-
-/* ---------------------------------------------------------- topbar */
-
-.jellylab-royale-builder .topbar {
-  height: 76px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  padding: 0 max(32px, calc((100vw - 1344px) / 2));
-  background: #fff;
-}
-.jellylab-royale-builder .brand {
-  font-size: 27px;
-  letter-spacing: -1.3px;
-  font-weight: 850;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.jellylab-royale-builder .brand-star {
-  color: var(--purple);
-  font-size: 29px;
-  line-height: 1;
-}
-.jellylab-royale-builder .topbar-product {
-  font-size: 14px;
-  color: var(--muted);
-  border-left: 1px solid var(--line);
-  padding-left: 22px;
-}
-.jellylab-royale-builder .prototype-pill {
-  color: var(--muted);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 3px 9px;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-.jellylab-royale-builder .cart-trigger {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 10px 0 10px 16px;
-}
-.jellylab-royale-builder .cart-icon {
-  display: none;
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.jellylab-royale-builder .cart-count {
-  font-size: 12px;
-  color: var(--purple);
-  background: var(--purple-pale);
-  min-width: 23px;
-  height: 23px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-}
-
-/* ---------------------------------------------------------- layout */
+} /* ---------------------------------------------------------- layout */
 
 .jellylab-royale-builder .builder {
   max-width: 1344px;
-  margin: 40px auto 0;
+  margin: 36px auto 0;
   display: grid;
   grid-template-columns: minmax(0, 0.91fr) minmax(0, 1.09fr);
   gap: 64px;
-  padding: 0 24px 132px;
+  padding: 0 24px 56px;
 }
 .jellylab-royale-builder .preview-sticky {
   position: sticky;
@@ -251,7 +165,7 @@ body {
   border-radius: 15px;
   overflow: hidden;
   aspect-ratio: 1033 / 1470;
-  max-height: calc(100vh - 202px);
+  max-height: calc(100vh - 118px);
   min-height: 0;
   display: flex;
   align-items: center;
@@ -326,7 +240,7 @@ body {
 .jellylab-royale-builder .active-caption {
   color: var(--selection);
   font-weight: 600;
-}/* ---------------------------------------------------------- summary */
+} /* ---------------------------------------------------------- summary */
 
 .jellylab-royale-builder .build-summary {
   margin: 23px 4px 0;
@@ -392,8 +306,7 @@ body {
   min-width: 0;
   font-weight: 800;
 }
-.jellylab-royale-builder h1 > span,
-.jellylab-royale-builder .cart-header h2 > span {
+.jellylab-royale-builder h1 > span {
   color: var(--purple);
 }
 .jellylab-royale-builder .intro p {
@@ -401,7 +314,8 @@ body {
   color: #757080;
   font-size: 15px;
   line-height: 1.65;
-}.jellylab-royale-builder .build-actions {
+}
+.jellylab-royale-builder .build-actions {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -470,19 +384,22 @@ body {
   border-radius: var(--radius);
   min-height: 67px;
   position: relative;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
 }
 .jellylab-royale-builder .choice:hover {
   border-color: var(--selection-hover);
   background: var(--selection-pale);
 }
-.jellylab-royale-builder .choice[aria-checked='true'] {
+.jellylab-royale-builder .choice[aria-checked="true"] {
   border-color: var(--selection);
   background: var(--selection-pale);
   box-shadow: inset 0 0 0 0.25px var(--selection);
 }
-.jellylab-royale-builder .choice[aria-checked='true']::after {
-  content: '✓';
+.jellylab-royale-builder .choice[aria-checked="true"]::after {
+  content: "✓";
   position: absolute;
   right: 6px;
   top: 3px;
@@ -513,7 +430,7 @@ body {
   font-size: 12px;
   color: #92879f;
   line-height: 1.3;
-}/* ---------------------------------------------------------- windows */
+} /* ---------------------------------------------------------- windows */
 
 .jellylab-royale-builder .window-options {
   display: grid;
@@ -530,12 +447,14 @@ body {
   padding: 12px 4px 10px;
   position: relative;
   background: #fff;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 .jellylab-royale-builder .window-option:hover {
   border-color: var(--selection-hover);
 }
-.jellylab-royale-builder .window-option[aria-pressed='true'] {
+.jellylab-royale-builder .window-option[aria-pressed="true"] {
   border-color: var(--selection);
   background: var(--selection-pale);
   box-shadow: inset 0 0 0 0.25px var(--selection);
@@ -606,7 +525,7 @@ body {
 .jellylab-royale-builder .color-option:hover {
   background: var(--surface);
 }
-.jellylab-royale-builder .color-option[aria-checked='true'] {
+.jellylab-royale-builder .color-option[aria-checked="true"] {
   border-color: var(--selection);
   background: var(--selection-pale);
 }
@@ -619,8 +538,8 @@ body {
   box-shadow: inset 0 0 0 2px #ffffff85;
   position: relative;
 }
-.jellylab-royale-builder .color-option[aria-checked='true'] .color-disc::after {
-  content: '✓';
+.jellylab-royale-builder .color-option[aria-checked="true"] .color-disc::after {
+  content: "✓";
   display: grid;
   place-items: center;
   position: absolute;
@@ -630,7 +549,7 @@ body {
   font-size: 15px;
   font-weight: 700;
 }
-.jellylab-royale-builder .color-option[data-value='none'] .color-disc::after {
+.jellylab-royale-builder .color-option[data-value="none"] .color-disc::after {
   color: var(--selection);
   text-shadow: none;
 }
@@ -675,7 +594,7 @@ body {
   background: var(--purple-pale);
   border-color: var(--purple);
 }
-.jellylab-royale-builder .window-actions .outline-button[aria-pressed='true'] {
+.jellylab-royale-builder .window-actions .outline-button[aria-pressed="true"] {
   border-color: var(--selection);
   background: var(--selection-pale);
 }
@@ -752,7 +671,7 @@ body {
 .jellylab-royale-builder .decal-option:hover {
   border-color: var(--selection-hover);
 }
-.jellylab-royale-builder .decal-option[aria-checked='true'] {
+.jellylab-royale-builder .decal-option[aria-checked="true"] {
   border-color: var(--selection);
   background: var(--selection-pale);
 }
@@ -777,7 +696,7 @@ body {
   font-size: 13px;
   padding: 8px 12px;
 }
-.jellylab-royale-builder .decal-finish-option[aria-checked='true'] {
+.jellylab-royale-builder .decal-finish-option[aria-checked="true"] {
   border-color: var(--selection);
   background: var(--selection-pale);
   color: var(--selection);
@@ -798,11 +717,12 @@ body {
   padding: 6px 0 6px 6px;
   color: var(--selection);
 }
-.jellylab-royale-builder .optional-service[data-expanded='false'] .section-heading {
+.jellylab-royale-builder
+  .optional-service[data-expanded="false"]
+  .section-heading {
   margin-bottom: 0;
 }
-.jellylab-royale-builder .removal-help,
-.jellylab-royale-builder .engraving-help {
+.jellylab-royale-builder .removal-help {
   font-size: 14px;
   line-height: 1.55;
   color: #757080;
@@ -830,7 +750,7 @@ body {
   border-color: var(--selection-hover);
   background: var(--selection-pale);
 }
-.jellylab-royale-builder .removal-choice[data-selected='true'] {
+.jellylab-royale-builder .removal-choice[data-selected="true"] {
   border-color: var(--selection);
   background: var(--selection-pale);
 }
@@ -850,160 +770,7 @@ body {
   grid-column: 1 / -1;
   font-weight: 650;
   min-height: 51px;
-}
-
-/* ---------------------------------------------------------- engraving */
-
-.jellylab-royale-builder .engraving-font-fieldset {
-  margin: 0 0 19px;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-}
-.jellylab-royale-builder .engraving-font-fieldset legend {
-  font-size: 14px;
-  font-weight: 600;
-  padding: 0;
-  margin-bottom: 9px;
-}
-.jellylab-royale-builder .engraving-font-options {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-.jellylab-royale-builder .engraving-font-choice {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 88px;
-  padding: 10px 4px;
-  border: 1px solid #d9d3e3;
-  border-radius: 10px;
-  font-size: 14px;
-  line-height: 1.35;
-  cursor: pointer;
-  text-align: center;
-}
-.jellylab-royale-builder .engraving-font-choice input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  margin: 0;
-  cursor: pointer;
-}
-.jellylab-royale-builder .engraving-font-choice:hover {
-  border-color: var(--selection-hover);
-}
-.jellylab-royale-builder .engraving-font-choice[data-selected='true'] {
-  border-color: var(--selection);
-  background: var(--selection-pale);
-}
-.jellylab-royale-builder .engraving-font-choice:focus-within {
-  outline: 3px solid var(--selection-focus);
-  outline-offset: 3px;
-}
-.jellylab-royale-builder .font-sample {
-  font-family: 'JellyLab Engraving', Arial, sans-serif;
-  font-size: 29px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-.jellylab-royale-builder .engraving-font-choice[data-font='serif'] .font-sample {
-  font-family: 'JellyLab Engraving Serif', Georgia, serif;
-}
-.jellylab-royale-builder .engraving-font-choice[data-font='mono'] .font-sample {
-  font-family: 'JellyLab Engraving Mono', monospace;
-}
-.jellylab-royale-builder .engraving-fields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-.jellylab-royale-builder .engraving-field {
-  min-width: 0;
-}
-.jellylab-royale-builder .engraving-field label {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: baseline;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.jellylab-royale-builder .engraving-field label span {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 400;
-  white-space: nowrap;
-}
-.jellylab-royale-builder .engraving-field input {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  border: 1px solid #d9d3e3;
-  border-radius: 10px;
-  padding: 13px 12px;
-  color: var(--ink);
-  font-size: 16px;
-  line-height: 1.4;
-  background: #fff;
-}
-.jellylab-royale-builder .engraving-field input::placeholder {
-  color: #a59bac;
-  font-size: 14px;
-}
-.jellylab-royale-builder .engraving-field input:focus {
-  outline: 2px solid var(--selection-focus);
-  outline-offset: 2px;
-  border-color: var(--selection);
-}
-.jellylab-royale-builder .engraving-limits {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #85788f;
-  margin: 10px 0 0;
-}
-.jellylab-royale-builder .engraving-preview {
-  position: relative;
-  margin: 18px 0 0;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  overflow: hidden;
-}
-.jellylab-royale-builder .engraving-preview svg {
-  display: block;
-  width: 100%;
-  max-width: 390px;
-  height: auto;
-  aspect-ratio: 1;
-  margin: 0 auto;
-}
-.jellylab-royale-builder .engraving-preview figcaption {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  font-size: 12px;
-  letter-spacing: 0.7px;
-  font-weight: 600;
-  color: #92849e;
-  padding: 0 17px 15px;
-  min-height: 30px;
-}
-.jellylab-royale-builder .engraving-preview .text-button {
-  letter-spacing: 0;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-/* ---------------------------------------------------------- price */
+} /* ---------------------------------------------------------- price */
 
 .jellylab-royale-builder .price-breakdown {
   border-top: 1px solid var(--line);
@@ -1019,7 +786,9 @@ body {
 .jellylab-royale-builder .price-breakdown > div {
   margin-bottom: 9px;
 }
-.jellylab-royale-builder .upgrade-prices {
+/* Beats `.price-breakdown > div`, which would otherwise lay the upgrade
+   rows out side by side instead of stacking them. */
+.jellylab-royale-builder .price-breakdown > .upgrade-prices {
   display: block;
   color: #716978;
 }
@@ -1047,136 +816,7 @@ body {
   font-size: 12px;
   color: var(--muted);
   margin: 7px 0 0;
-}
-
-/* ---------------------------------------------------------- purchase bar */
-
-.jellylab-royale-builder .purchase-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #ffffffed;
-  backdrop-filter: blur(16px);
-  border-top: 1px solid var(--line);
-  z-index: 5;
-  padding: 14px 24px calc(14px + env(safe-area-inset-bottom));
-}
-.jellylab-royale-builder .purchase-inner {
-  max-width: 1296px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 35px;
-}
-.jellylab-royale-builder .purchase-summary {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-.jellylab-royale-builder .purchase-preview {
-  display: block;
-  width: 48px;
-  flex: 0 0 48px;
-  background: #fff;
-  border-radius: 6px;
-  overflow: hidden;
-}
-.jellylab-royale-builder .purchase-preview svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.jellylab-royale-builder .purchase-price {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.jellylab-royale-builder .purchase-title {
-  font-size: 12px;
-  color: #8e839b;
-}
-.jellylab-royale-builder .purchase-price strong {
-  font-size: 27px;
-  font-weight: 750;
-  letter-spacing: -0.8px;
-  line-height: 1.2;
-}
-.jellylab-royale-builder .purchase-price small {
-  font-weight: 500;
-  font-size: 12px;
-  color: #8e839b;
-  letter-spacing: 0;
-  margin-left: 5px;
-}
-.jellylab-royale-builder .purchase-note {
-  display: block;
-  max-width: 260px;
-  margin: 0 0 0 auto;
-  text-align: right;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--muted);
-}
-.jellylab-royale-builder .purchase-note > span {
-  display: block;
-}
-.jellylab-royale-builder .purchase-note a {
-  color: var(--selection);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  font-weight: 650;
-}
-.jellylab-royale-builder .purchase-actions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-shrink: 0;
-}
-.jellylab-royale-builder .purchase-shipping {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  gap: 2px;
-  max-width: 125px;
-  font-size: 12px;
-  line-height: 1.3;
-  color: #6d6379;
-}
-.jellylab-royale-builder .purchase-shipping strong {
-  font-size: 13px;
-  font-weight: 650;
-  color: var(--ink);
-}
-.jellylab-royale-builder .purchase-shipping[data-unlocked='true'] strong {
-  color: var(--selection);
-}
-.jellylab-royale-builder .primary-button {
-  background: var(--purple);
-  color: #fff;
-  font-weight: 650;
-  font-size: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 25px;
-  padding: 15px 24px;
-  border-radius: 11px;
-  transition: background 0.15s, transform 0.15s;
-}
-.jellylab-royale-builder .primary-button:hover {
-  background: var(--purple-dark);
-}
-.jellylab-royale-builder .primary-button:active {
-  transform: scale(0.98);
-}
-.jellylab-royale-builder .add-button {
-  min-width: 240px;
-  justify-content: space-between;
-}
-
-/* ---------------------------------------------------------- toast */
+} /* ---------------------------------------------------------- toast */
 
 .jellylab-royale-builder .toast {
   position: fixed;
@@ -1191,39 +831,15 @@ body {
   z-index: 20;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s, transform 0.15s;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
   max-width: 90vw;
   text-align: center;
 }
 .jellylab-royale-builder .toast.visible {
   opacity: 1;
   transform: translate(-50%, 0);
-}
-
-/* ---------------------------------------------------------- cart */
-
-.jellylab-royale-builder .cart-dialog {
-  border: 0;
-  border-left: 1px solid var(--line);
-  margin: 0 0 0 auto;
-  padding: 0;
-  width: min(570px, 100%);
-  height: 100dvh;
-  max-height: 100dvh;
-  max-width: 100%;
-  background: #fff;
-  color: var(--ink);
-  overflow: hidden;
-  font-family: inherit;
-}
-.jellylab-royale-builder .cart-dialog[open] {
-  display: flex;
-  flex-direction: column;
-  animation: drawer-in 0.18s ease-out;
-}
-.jellylab-royale-builder .cart-dialog::backdrop {
-  background: #17102059;
-  backdrop-filter: blur(3px);
 }
 @keyframes drawer-in {
   from {
@@ -1232,225 +848,7 @@ body {
   to {
     transform: translateX(0);
   }
-}
-.jellylab-royale-builder .cart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 28px 26px 22px;
-  border-bottom: 1px solid var(--line);
-}
-.jellylab-royale-builder .cart-header h2 {
-  font-size: 30px;
-  margin: 5px 0 0;
-  letter-spacing: -1px;
-}
-.jellylab-royale-builder .icon-button {
-  font-size: 30px;
-  width: 38px;
-  height: 38px;
-  color: #8a7f95;
-  border-radius: 50%;
-  line-height: 1;
-}
-.jellylab-royale-builder .icon-button:hover {
-  background: var(--surface);
-}
-.jellylab-royale-builder .cart-content {
-  overflow-y: auto;
-  flex: 1;
-  padding: 0 26px;
-}
-.jellylab-royale-builder .cart-item {
-  padding: 23px 0;
-  border-bottom: 1px solid var(--line);
-}
-.jellylab-royale-builder .cart-item-main {
-  display: grid;
-  grid-template-columns: 118px minmax(0, 1fr);
-  gap: 18px;
-}
-.jellylab-royale-builder .cart-previews {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  min-width: 0;
-}
-.jellylab-royale-builder .cart-thumbnail,
-.jellylab-royale-builder .cart-backplate {
-  display: block;
-  width: 100%;
-  background: var(--surface);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.jellylab-royale-builder .cart-backplate {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #fff;
-}
-.jellylab-royale-builder .cart-thumbnail svg,
-.jellylab-royale-builder .cart-backplate svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.jellylab-royale-builder .cart-item-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-.jellylab-royale-builder .cart-item-heading h3 {
-  font-size: 15px;
-  line-height: 1.3;
-  margin: 0 0 7px;
-  font-weight: 700;
-}
-.jellylab-royale-builder .cart-item-heading strong {
-  font-size: 16px;
-  white-space: nowrap;
-}
-.jellylab-royale-builder .cart-build-code {
-  font-size: 12px;
-  letter-spacing: 0.7px;
-  color: #9d91a9;
-  font-weight: 400;
-}
-.jellylab-royale-builder .cart-item-details {
-  margin: 10px 0 0;
-  display: grid;
-  /* Wide enough for the longest label ("Engraving · bottom") to stay on one line. */
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 4px 8px;
-  font-size: 12px;
-  line-height: 1.4;
-}
-.jellylab-royale-builder .cart-item-details dt {
-  color: #90839e;
-}
-.jellylab-royale-builder .cart-item-details dd {
-  margin: 0;
-  align-self: start;
-  color: #54485f;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-.jellylab-royale-builder .cart-item-actions {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 16px;
-}
-.jellylab-royale-builder .quantity-control {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-}
-.jellylab-royale-builder .quantity-control button {
-  width: 27px;
-  height: 28px;
-  font-size: 17px;
-}
-.jellylab-royale-builder .quantity-control span {
-  min-width: 23px;
-  text-align: center;
-}
-.jellylab-royale-builder .remove-item {
-  margin-left: auto;
-  color: #a291af;
-}
-.jellylab-royale-builder .cart-upgrades {
-  font-size: 12px;
-  color: #897696;
-  margin-top: 11px;
-  line-height: 1.65;
-}
-.jellylab-royale-builder .cart-footer {
-  padding: 20px 26px 24px;
-  border-top: 1px solid var(--line);
-  background: #fff;
-}
-.jellylab-royale-builder .cart-subtotal {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 15px;
-  font-weight: 650;
-}
-.jellylab-royale-builder .cart-subtotal strong {
-  font-size: 26px;
-}
-.jellylab-royale-builder .cart-tax-note {
-  font-size: 12px;
-  color: #94869f;
-  margin: 5px 0 17px;
-}
-.jellylab-royale-builder .checkout-button {
-  width: 100%;
-  justify-content: space-between;
-}
-.jellylab-royale-builder .demo-note {
-  text-align: center;
-  font-size: 12px;
-  color: #9b8ca8;
-  margin: 13px 0 0;
-}
-.jellylab-royale-builder .empty-cart {
-  padding: 65px 10px;
-  text-align: center;
-}
-.jellylab-royale-builder .empty-cart h3 {
-  font-size: 23px;
-  letter-spacing: -0.7px;
-  margin: 0 0 10px;
-}
-.jellylab-royale-builder .empty-cart p {
-  font-size: 14px;
-  color: var(--muted);
-}
-.jellylab-royale-builder .empty-cart button {
-  margin: 25px auto 0;
-}
-.jellylab-royale-builder .checkout-summary {
-  padding: 24px 0;
-}
-.jellylab-royale-builder .checkout-summary h3 {
-  font-size: 24px;
-  letter-spacing: -0.7px;
-  margin: 0 0 12px;
-}
-.jellylab-royale-builder .checkout-summary > p {
-  font-size: 14px;
-  color: #85768f;
-  line-height: 1.7;
-}
-.jellylab-royale-builder .checkout-order {
-  margin-top: 24px;
-  padding: 18px;
-  background: var(--surface);
-  border-radius: 12px;
-}
-.jellylab-royale-builder .checkout-order div {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  font-size: 14px;
-  margin: 10px 0;
-}
-.jellylab-royale-builder .checkout-order .checkout-total {
-  border-top: 1px solid var(--line);
-  padding-top: 15px;
-  margin-top: 15px;
-  font-weight: 700;
-}
-.jellylab-royale-builder .checkout-summary .outline-button {
-  margin-top: 24px;
-}
-
-/* ---------------------------------------------------------- responsive */
+} /* ---------------------------------------------------------- responsive */
 
 @media (min-width: 1450px) {
   .jellylab-royale-builder .watch-stage {
@@ -1471,9 +869,6 @@ body {
     margin-top: 30px;
     grid-template-columns: minmax(0, 0.87fr) minmax(0, 1.13fr);
   }
-  .jellylab-royale-builder .topbar {
-    padding: 0 26px;
-  }
   .jellylab-royale-builder .preview-card {
     padding: 13px;
   }
@@ -1488,7 +883,8 @@ body {
   .jellylab-royale-builder .material-swatch {
     width: 27px;
     height: 27px;
-  }  .jellylab-royale-builder .build-summary dl {
+  }
+  .jellylab-royale-builder .build-summary dl {
     font-size: 12px;
     grid-template-columns: 110px minmax(0, 1fr);
   }
@@ -1513,7 +909,7 @@ body {
     max-width: 650px;
     gap: 30px;
     row-gap: 10px;
-    padding: 0 20px 125px;
+    padding: 0 20px 40px;
     margin-top: 24px;
   }
   .jellylab-royale-builder .preview-column {
@@ -1532,7 +928,8 @@ body {
   .jellylab-royale-builder .controls-column {
     order: 1;
   }
-  .jellylab-royale-builder :is(section, fieldset, button, label, input, .window-option) {
+  .jellylab-royale-builder
+    :is(section, fieldset, button, label, input, .window-option) {
     scroll-margin-top: calc(var(--sticky-preview, 0px) + 12px);
   }
   .jellylab-royale-builder .watch-stage {
@@ -1569,7 +966,8 @@ body {
   }
   .jellylab-royale-builder .preview-caption .preview-instruction {
     display: none;
-  }  .jellylab-royale-builder .choice-name {
+  }
+  .jellylab-royale-builder .choice-name {
     font-size: 14px;
   }
   .jellylab-royale-builder .choice {
@@ -1580,30 +978,6 @@ body {
   .jellylab-royale-builder .material-swatch {
     width: 32px;
     height: 32px;
-  }  .jellylab-royale-builder .topbar {
-    height: 66px;
-    padding: 0 20px;
-    gap: 13px;
-  }
-  .jellylab-royale-builder .topbar-product {
-    font-size: 12px;
-    border: 0;
-    padding: 0;
-  }
-  .jellylab-royale-builder .prototype-pill {
-    margin-left: auto;
-  }
-  .jellylab-royale-builder .cart-trigger {
-    margin-left: 0;
-  }
-  .jellylab-royale-builder .cart-label {
-    display: none;
-  }
-  .jellylab-royale-builder .cart-icon {
-    display: block;
-  }
-  .jellylab-royale-builder .brand {
-    font-size: 24px;
   }
   .jellylab-royale-builder .color-disc {
     width: 42px;
@@ -1620,90 +994,9 @@ body {
   .jellylab-royale-builder .selection-label {
     font-size: 13px;
   }
-  .jellylab-royale-builder .purchase-bar {
-    padding: 6px 20px max(6px, env(safe-area-inset-bottom, 0px));
-  }
-  .jellylab-royale-builder .purchase-inner {
-    gap: 16px;
-    justify-content: space-between;
-  }
-  .jellylab-royale-builder .purchase-summary {
-    gap: 8px;
-  }
-  .jellylab-royale-builder .purchase-actions {
-    gap: 10px;
-  }
-  .jellylab-royale-builder .purchase-preview {
-    width: 36px;
-    flex-basis: 36px;
-  }
-  .jellylab-royale-builder .purchase-note {
-    display: none;
-  }
-  .jellylab-royale-builder .add-button {
-    min-width: 165px;
-    min-height: 44px;
-    padding: 10px 14px;
-  }
-}
-
-@media (max-width: 600px) {
-  .jellylab-royale-builder .purchase-inner {
-    display: grid;
-    grid-template-columns: 32px minmax(65px, 1fr) 70px auto;
-    gap: 0 8px;
-  }
-  .jellylab-royale-builder .purchase-summary,
-  .jellylab-royale-builder .purchase-actions {
-    display: contents;
-  }
-  .jellylab-royale-builder .purchase-preview {
-    grid-column: 1;
-    grid-row: 1;
-    width: 32px;
-  }
-  .jellylab-royale-builder .purchase-price {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  .jellylab-royale-builder .purchase-shipping {
-    grid-column: 3;
-    grid-row: 1;
-    font-size: 11px;
-    gap: 1px;
-  }
-  .jellylab-royale-builder .purchase-shipping strong {
-    font-size: 11px;
-  }
-  .jellylab-royale-builder .add-button {
-    grid-column: 4;
-    grid-row: 1;
-    min-width: 0;
-    padding: 10px 12px;
-    font-size: 14px;
-    white-space: nowrap;
-  }
-  .jellylab-royale-builder .add-button svg {
-    display: none;
-  }
-  .jellylab-royale-builder .purchase-price strong {
-    font-size: 24px;
-    white-space: nowrap;
-  }
-  .jellylab-royale-builder .purchase-price small {
-    font-size: 10px;
-    margin-left: 2px;
-  }
-  .jellylab-royale-builder .purchase-title {
-    font-size: 11px;
-    line-height: 1.2;
-  }
 }
 
 @media (max-width: 480px) {
-  .jellylab-royale-builder .topbar-product {
-    display: none;
-  }
   .jellylab-royale-builder .builder {
     padding: 0 14px 140px;
     margin-top: 17px;
@@ -1722,11 +1015,11 @@ body {
     flex-basis: 56px;
     width: 56px;
     height: 56px;
-  }  .jellylab-royale-builder .choice-grid {
+  }
+  .jellylab-royale-builder .choice-grid {
     gap: 8px;
   }
-  .jellylab-royale-builder .case-grid,
-  .jellylab-royale-builder .box-grid {
+  .jellylab-royale-builder .case-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .jellylab-royale-builder .choice {
@@ -1772,13 +1065,6 @@ body {
   .jellylab-royale-builder .removal-choice {
     min-height: 55px;
   }
-  .jellylab-royale-builder .engraving-fields {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .jellylab-royale-builder .engraving-section .section-heading {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
   .jellylab-royale-builder .optional-service .section-heading {
     gap: 8px;
   }
@@ -1795,44 +1081,14 @@ body {
     gap: 15px;
     justify-content: space-between;
   }
-  .jellylab-royale-builder .cart-header,
-  .jellylab-royale-builder .cart-footer {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-  .jellylab-royale-builder .cart-content {
-    padding: 0 20px;
-  }
-  .jellylab-royale-builder .cart-item-main {
-    grid-template-columns: 95px minmax(0, 1fr);
-    gap: 14px;
-  }
-  .jellylab-royale-builder .cart-item-heading {
-    flex-wrap: wrap;
-    gap: 0;
-  }
-  .jellylab-royale-builder .cart-item-details {
-    grid-template-columns: 96px minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 360px) {
-  .jellylab-royale-builder .purchase-bar {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-  .jellylab-royale-builder .purchase-inner {
-    grid-template-columns: 32px minmax(65px, 1fr) 64px auto;
-    column-gap: 6px;
-  }
   .jellylab-royale-builder .preview-caption {
     padding-left: 1px;
     padding-right: 1px;
     gap: 6px;
     font-size: 11px;
-  }
-  .jellylab-royale-builder .purchase-price strong {
-    font-size: 22px;
   }
 }
 

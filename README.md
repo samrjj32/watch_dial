@@ -2,9 +2,12 @@
 
 A Next.js port of the JellyLab Watches "Custom Casio Royale" builder, rebuilt from
 the original Shopify storefront modules (`jellylab-catalog`, `jellylab-renderer`,
-`jellylab-decals`, `jellylab-engraving`, `jellylab-text-removal`,
-`jellylab-backplate-renderer`). Catalog data, prices, aperture geometry and the
-design system are ports of that source rather than approximations.
+`jellylab-decals`, `jellylab-text-removal`). Catalog data, prices, aperture geometry
+and the design system are ports of that source rather than approximations.
+
+It is the configurator alone: no site chrome, no cart, no checkout. There is no
+header, no fixed purchase bar and no "Add to cart" — the page is meant to sit
+inside a host that provides those.
 
 ## Features
 
@@ -23,14 +26,10 @@ design system are ports of that source rather than approximations.
   can be extended across every window as one continuous sweep.
 - **Step 3 · Text removal** — pick the printed legends (and the analog numbers ring)
   to remove; $25 per watch regardless of how many.
-- **Step 4 · Laser engraving** — three Liberation faces, two rows of up to 25
-  graphemes, previewed on a caseback render; $25.
 - **Pricing** — USD, in cents: $145 for the black watch, $180 gold, $185 silver,
-  plus $25 for each finishing service, and the $150 free-US-shipping threshold drives the purchase bar.
+  plus $25 if any text is removed. The breakdown sits at the foot of the controls.
 - **Shareable builds** — "Copy link to build" writes the configuration to the URL
   hash; the same state is kept in `sessionStorage` between reloads.
-- **Cart** — a modal drawer with per-item previews, build codes, quantities and a
-  prototype checkout summary. No payment backend.
 
 ## Getting started
 
@@ -45,18 +44,16 @@ Open http://localhost:3000.
 
 ```
 app/
-  layout.tsx           Root layout, metadata, Inter + CDN preconnects
-  page.tsx             Renders the builder
-  globals.css          The ported design system, scoped to .jellylab-royale-builder
+  layout.tsx        Root layout, metadata, Inter + CDN preconnects
+  page.tsx          Renders the builder
+  globals.css       The ported design system, scoped to .jellylab-royale-builder
 components/
-  Builder.tsx          Sections, pricing, keyboard radiogroups, persistence, cart
-  WatchPreview.tsx     The composited watch SVG and its aperture hotspots
-  MiniWatch.tsx        Window-picker diagram, sharing the renderer's aperture paths
-  BackplatePreview.tsx Caseback with the factory block and the engraved rows
-  CartDrawer.tsx       Cart dialog and prototype checkout
+  Builder.tsx       Sections, pricing, keyboard radiogroups, persistence
+  WatchPreview.tsx  The composited watch SVG and its aperture hotspots
+  MiniWatch.tsx     Window-picker diagram, sharing the renderer's aperture paths
 lib/
-  catalog.ts           Cases, bands, filters, windows, decals, engraving, pricing
-  assets.ts            CDN artwork URLs and the engraving font files
+  catalog.ts        Cases, bands, filters, windows, decals, text removal, pricing
+  assets.ts         CDN artwork URLs
 ```
 
 ## Notes
@@ -68,5 +65,3 @@ lib/
   silver render.
 - Case photos are 1033 × 1523; the live preview crops to 1033 × 1470 so the caption
   baked into the bottom of each photo never appears.
-- There is no checkout — "Add to cart" builds the Shopify-style line-item
-  properties and opens the cart drawer.

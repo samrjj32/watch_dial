@@ -3,21 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import WatchPreview from './WatchPreview';
 import MiniWatch from './MiniWatch';
-import BackplatePreview from './BackplatePreview';
-import CartDrawer, { type CartItem } from './CartDrawer';
 import {
   CASES,
   DECALS,
   DECAL_FINISHES,
   DEFAULT_BUILD,
-  ENGRAVING_MAX_LENGTH,
-  ENGRAVING_FONTS,
-  ENGRAVING_ROWS,
-  ENGRAVING_EXAMPLES,
   FILTERS,
   TEXT_REMOVALS,
   TEXT_REMOVAL_PRICE,
-  ENGRAVING_PRICE,
   WINDOWS,
   type Build,
   type DecalFinish,
@@ -25,15 +18,11 @@ import {
   buildProperties,
   circleDecalName,
   decalById,
-  engravingFont,
   extendGradient,
   filterBackground,
-  hasEngraving,
   money,
   normalizeBuild,
-  normalizeEngravingLine,
   priceBuild,
-  usShippingStatus,
 } from '@/lib/catalog';
 import { ASSETS, CASE_IMAGES, decalImage, isTextAsset } from '@/lib/assets';
 
@@ -119,10 +108,8 @@ function useArtworkReady(build: Build) {
 export default function Builder() {
   const [build, setBuild] = useState<Build>(DEFAULT_BUILD);
   const [activeWindow, setActiveWindow] = useState(0);
-  const [expanded, setExpanded] = useState({ removal: false, engraving: false });
+  const [expanded, setExpanded] = useState({ removal: false });
   const [toast, setToast] = useState('');
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [cartOpen, setCartOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const windowsSection = useRef<HTMLElement>(null);
   const previewCard = useRef<HTMLDivElement>(null);
@@ -153,15 +140,10 @@ export default function Builder() {
   /* -------------------------------------------------- derived values */
   const pricing = useMemo(() => priceBuild(build), [build]);
   const properties = useMemo(() => buildProperties(build), [build]);
-  const shipping = usShippingStatus(pricing.total);
   const artwork = useArtworkReady(build);
   const window0Decal = decalById(build.circleDecal?.id);
   const activeFilter = byId(FILTERS, build.windows[activeWindow])!;
   const activeIsDecal = activeWindow === 0 && !!build.circleDecal;
-  const engravingSelected = hasEngraving(build.engraving);
-  const previewEngraving = engravingSelected
-    ? build.engraving
-    : { ...ENGRAVING_EXAMPLES, font: build.engraving.font };
   const watchLabel = 'Your Casio Royale: ' + Object.values(properties).join(', ');
 
   const update = useCallback((patch: Partial<Build>) => {
@@ -287,7 +269,7 @@ export default function Builder() {
   const startOver = () => {
     setBuild(DEFAULT_BUILD);
     setActiveWindow(0);
-    setExpanded({ removal: false, engraving: false });
+    setExpanded({ removal: false });
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
     showToast('Started a fresh build.');
   };
@@ -308,60 +290,12 @@ export default function Builder() {
     showToast('Here is a random Royale. Keep tweaking it.');
   };
 
-  const addToCart = () => {
-    const snapshot = normalizeBuild(build);
-    const id =
-      'JL-' +
-      (globalThis.crypto?.randomUUID?.().slice(0, 8).toUpperCase() ??
-        Math.random().toString(36).slice(2, 10).toUpperCase());
-    setCart((items) => [
-      ...items,
-      { id, build: snapshot, quantity: 1, unitPrice: priceBuild(snapshot).total },
-    ]);
-    setCartOpen(true);
-  };
-
   /* -------------------------------------------------- render */
-  const sections: Array<{
-    key: 'removal' | 'engraving';
-    label: string;
-    selected: boolean;
-  }> = [
-    { key: 'removal', label: 'text removal', selected: build.textRemovals.length > 0 },
-    { key: 'engraving', label: 'laser engraving', selected: engravingSelected },
-  ];
-  const toggleLabel = (key: 'removal' | 'engraving') => {
-    const section = sections.find((s) => s.key === key)!;
-    return expanded[key] ? 'Done' : section.selected ? 'Edit' : 'Add';
-  };
-
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const toggleLabel = () =>
+    expanded.removal ? 'Done' : build.textRemovals.length > 0 ? 'Edit' : 'Add';
 
   return (
     <div className="jellylab-royale-builder" ref={root} onKeyDown={handleRadioKeys}>
-      <header className="topbar">
-        <span className="brand">
-          <span className="brand-star" aria-hidden>
-            ✳
-          </span>
-          JellyLab
-        </span>
-        <span className="topbar-product">Custom Casio Royale</span>
-        <span className="prototype-pill">Prototype</span>
-        <button
-          type="button"
-          className="cart-trigger"
-          onClick={() => setCartOpen(true)}
-          aria-label={`Cart, ${cartCount} ${cartCount === 1 ? 'item' : 'items'}`}
-        >
-          {/* Narrow layouts drop the word, so the button keeps a glyph. */}
-          <svg className="cart-icon" viewBox="0 0 24 24" aria-hidden>
-            <path d="M6 7h12l-1 12H7L6 7Zm3 0a3 3 0 0 1 6 0" />
-          </svg>
-          <span className="cart-label">Cart</span>
-          <span className="cart-count">{cartCount}</span>
-        </button>
-      </header>
 
       <div className="builder">
         {/* ------------------------------------------------ preview */}
@@ -684,10 +618,10 @@ export default function Builder() {
                   type="button"
                   className="service-toggle"
                   aria-expanded={expanded.removal}
-                  aria-label={`${toggleLabel('removal')} text removal`}
+                  aria-label={`${toggleLabel()} text removal`}
                   onClick={() => setExpanded((s) => ({ ...s, removal: !s.removal }))}
                 >
-                  {toggleLabel('removal')}
+                  {toggleLabel()}
                 </button>
               </div>
             </div>
@@ -734,123 +668,6 @@ export default function Builder() {
             )}
           </section>
 
-          {/* 4 · Laser engraving */}
-          <section
-            className="option-section optional-service engraving-section"
-            data-expanded={expanded.engraving}
-            aria-labelledby="engraving-heading"
-          >
-            <div className="section-heading">
-              <h2 id="engraving-heading">
-                <span className="step">4</span> Laser engraving
-              </h2>
-              <div className="service-heading-actions">
-                <span className="selection-label">
-                  {engravingSelected
-                    ? `+${money(ENGRAVING_PRICE)}`
-                    : `Optional · +${money(ENGRAVING_PRICE)}`}
-                </span>
-                <button
-                  type="button"
-                  className="service-toggle"
-                  aria-expanded={expanded.engraving}
-                  aria-label={`${toggleLabel('engraving')} laser engraving`}
-                  onClick={() => setExpanded((s) => ({ ...s, engraving: !s.engraving }))}
-                >
-                  {toggleLabel('engraving')}
-                </button>
-              </div>
-            </div>
-            {expanded.engraving && (
-              <div>
-                <p className="engraving-help">
-                  Add a personal message above or below the original Casio engraving. Leave either
-                  row blank to skip it.
-                </p>
-                <fieldset className="engraving-font-fieldset">
-                  <legend>Font</legend>
-                  <div className="engraving-font-options">
-                    {ENGRAVING_FONTS.map((font) => (
-                      <label
-                        key={font.id}
-                        className="engraving-font-choice"
-                        data-font={font.id}
-                        data-selected={build.engraving.font === font.id}
-                      >
-                        <input
-                          type="radio"
-                          name="engraving-font"
-                          value={font.id}
-                          checked={build.engraving.font === font.id}
-                          onChange={() =>
-                            update({ engraving: { ...build.engraving, font: font.id } })
-                          }
-                        />
-                        <span className="font-sample" aria-hidden>
-                          Aa
-                        </span>
-                        <span>{font.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-
-                <div className="engraving-fields">
-                  {ENGRAVING_ROWS.map((row) => (
-                    <div className="engraving-field" key={row}>
-                      <label htmlFor={`engraving-${row}`}>
-                        {row === 'top' ? 'Top row' : 'Bottom row'}
-                        <span>
-                          {Array.from(build.engraving[row]).length} / {ENGRAVING_MAX_LENGTH}
-                        </span>
-                      </label>
-                      <input
-                        id={`engraving-${row}`}
-                        type="text"
-                        autoComplete="off"
-                        spellCheck={false}
-                        placeholder={ENGRAVING_EXAMPLES[row]}
-                        value={build.engraving[row]}
-                        onChange={(event) =>
-                          update({
-                            engraving: {
-                              ...build.engraving,
-                              [row]: normalizeEngravingLine(event.target.value),
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-                <p className="engraving-limits">
-                  Text only · Up to {ENGRAVING_MAX_LENGTH} characters per row.
-                </p>
-
-                <figure className="engraving-preview">
-                  <BackplatePreview
-                    engraving={previewEngraving}
-                    label={`${engravingSelected ? 'Your' : 'Example'} stainless steel backplate with original Casio engraving. Font: ${engravingFont(build.engraving.font).name}. Top row: ${previewEngraving.top.trim() || 'blank'}. Bottom row: ${previewEngraving.bottom.trim() || 'blank'}.`}
-                  />
-                  <figcaption>
-                    <span>{engravingSelected ? 'YOUR BACKPLATE' : 'EXAMPLE ENGRAVING'}</span>
-                    {engravingSelected && (
-                      <button
-                        type="button"
-                        className="text-button"
-                        onClick={() =>
-                          update({ engraving: { ...build.engraving, top: '', bottom: '' } })
-                        }
-                      >
-                        Clear text
-                      </button>
-                    )}
-                  </figcaption>
-                </figure>
-              </div>
-            )}
-          </section>
-
           {/* Price */}
           <section className="price-breakdown" aria-label="Price breakdown">
             <div>
@@ -877,58 +694,10 @@ export default function Builder() {
         </div>
       </div>
 
-      {/* ------------------------------------------------ purchase bar */}
-      <footer className="purchase-bar">
-        <div className="purchase-inner">
-          <div className="purchase-summary">
-            <span className="purchase-preview" aria-hidden>
-              <WatchPreview build={build} label="" />
-            </span>
-            <span className="purchase-price">
-              <span className="purchase-title">Your custom Royale</span>
-              <strong>
-                {money(pricing.total)} <small>USD</small>
-              </strong>
-            </span>
-          </div>
-          <p className="purchase-note">
-            <span>Gifting and uncertain?</span>
-            <a href="https://jellylabwatches.com/products/jellylab-watches-gift-card" target="_blank" rel="noopener noreferrer">
-              We have gift cards
-            </a>
-          </p>
-          <div className="purchase-actions">
-            <div className="purchase-shipping" data-unlocked={shipping.unlocked} aria-label={shipping.label}>
-              <strong>{shipping.headline}</strong>
-              <span>{shipping.detail}</span>
-            </div>
-            <button type="button" className="primary-button add-button" onClick={addToCart}>
-              <span>Add to cart</span>
-              <svg viewBox="0 0 24 24" aria-hidden>
-                <path d="M5 12h14m-5-5 5 5-5 5" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </footer>
-
       <div className={`toast${toast ? ' visible' : ''}`} role="status" aria-live="polite">
         {toast}
       </div>
 
-      <CartDrawer
-        open={cartOpen}
-        items={cart}
-        onClose={() => setCartOpen(false)}
-        onChangeQuantity={(id, quantity) =>
-          setCart((items) =>
-            quantity <= 0
-              ? items.filter((item) => item.id !== id)
-              : items.map((item) => (item.id === id ? { ...item, quantity } : item))
-          )
-        }
-        onRemove={(id) => setCart((items) => items.filter((item) => item.id !== id))}
-      />
     </div>
   );
 }

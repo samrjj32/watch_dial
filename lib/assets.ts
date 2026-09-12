@@ -14,7 +14,6 @@ export const ASSETS = {
   bandLeather: `${FILES}/jellylab-builder-r10-band-leather.png?v=1788910299`,
   bandSteel: `${FILES}/jellylab-builder-r10-band-steel-v2.webp?v=1788910310`,
   textRemoval: `${FILES}/jellylab-builder-r10-text-removal-patches.webp?v=1788910323`,
-  backplate: `${FILES}/jellylab-builder-r10-backplate.webp?v=1788910336`,
 } as const;
 
 /** Case artwork is the complete watch photograph in that case colour. */
@@ -44,15 +43,6 @@ const DECAL_VERSIONS: Record<string, number> = {
 export function decalImage(name: string): string {
   return `${FILES}/jellylab-builder-r10-decals-registered-${name}.webp?v=${DECAL_VERSIONS[name] ?? 1788910410}`;
 }
-
-export const ENGRAVING_FONT_FILES = {
-  'JellyLab Engraving':
-    `${THEME}/jellylab-LiberationSans-Bold.ttf?v=176841402872383988591788989289`,
-  'JellyLab Engraving Serif':
-    `${THEME}/jellylab-LiberationSerif-Bold.ttf?v=117273945954138768891788989291`,
-  'JellyLab Engraving Mono':
-    `${THEME}/jellylab-LiberationMono-Bold.ttf?v=29339701234796781821788989289`,
-} as const;
 
 /** True for assets stored as a base64 payload inside a text file. */
 export const isTextAsset = (url: string) => /\.image\.txt(?:\?|$)/.test(url);

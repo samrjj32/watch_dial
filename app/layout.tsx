@@ -4,14 +4,13 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Custom Casio Royale · Build yours — JellyLab Watches',
   description:
-    'Configure a Casio Royale end to end: case and band materials, a colour or decal for ' +
-    'every window, printed text removal and laser engraving on the caseback.',
+    'Configure a Casio Royale: pick the watch, a colour or decal for every window, ' +
+    'and which printed dial legends to remove.',
   applicationName: 'JellyLab Royale Builder',
   openGraph: {
     title: 'Custom Casio Royale · JellyLab Watches',
     description:
-      'Configure a Casio Royale end to end: case, band, window colours and decals, ' +
-      'text removal and laser engraving.',
+      'Configure a Casio Royale: the watch, window colours and decals, and text removal.',
     type: 'website',
   },
 };
