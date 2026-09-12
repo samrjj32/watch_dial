@@ -25,7 +25,6 @@ design system are ports of that source rather than approximations.
   to remove; $25 per watch regardless of how many.
 - **Step 4 · Laser engraving** — three Liberation faces, two rows of up to 25
   graphemes, previewed on a caseback render; $25.
-- **Step 5 · Watch box** — colour preference, included.
 - **Pricing** — USD, in cents: $145 for the black watch, $180 gold, $185 silver,
   plus $25 for each finishing service, and the $150 free-US-shipping threshold drives the purchase bar.
 - **Shareable builds** — "Copy link to build" writes the configuration to the URL

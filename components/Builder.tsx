@@ -6,7 +6,6 @@ import MiniWatch from './MiniWatch';
 import BackplatePreview from './BackplatePreview';
 import CartDrawer, { type CartItem } from './CartDrawer';
 import {
-  BOXES,
   CASES,
   DECALS,
   DECAL_FINISHES,
@@ -405,10 +404,6 @@ export default function Builder() {
                 <span className="active-caption">
                   0{activeWindow + 1} · {WINDOWS[activeWindow].name} selected
                 </span>
-                <span className="preview-mobile-proof">3,000+ built</span>
-                <span className="preview-mobile-proof preview-review">
-                  4.92 <span className="review-star" aria-hidden>★</span> (390+)
-                </span>
               </div>
             </div>
 
@@ -446,22 +441,6 @@ export default function Builder() {
               Choose the watch, its window colours and the finishing services. Every Royale is a
               genuine Casio AE1200 rebuilt by hand.
             </p>
-            <div className="builder-proof" aria-label="About JellyLab">
-              <div className="proof-item">
-                <strong>3,000+</strong>
-                <span>watches built</span>
-              </div>
-              <div className="proof-item">
-                <strong>
-                  <span className="proof-star" aria-hidden>★</span> 4.92 stars
-                </strong>
-                <span>based on 390+ reviews</span>
-              </div>
-              <div className="proof-item">
-                <strong>150k+</strong>
-                <span>follow our builds on YouTube</span>
-              </div>
-            </div>
             <div className="build-actions">
               <button type="button" className="outline-button" onClick={surpriseMe}>
                 Surprise me
@@ -870,40 +849,6 @@ export default function Builder() {
                 </figure>
               </div>
             )}
-          </section>
-
-          {/* 5 · Watch box */}
-          <section className="option-section" aria-labelledby="box-heading">
-            <div className="section-heading">
-              <h2 id="box-heading">
-                <span className="step">5</span> Watch box
-              </h2>
-              <span className="included-label">Included</span>
-            </div>
-            <div className="choice-grid box-grid" role="radiogroup" aria-label="Watch box color">
-              {BOXES.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className="choice"
-                  role="radio"
-                  aria-checked={build.box === option.id}
-                  tabIndex={build.box === option.id ? 0 : -1}
-                  onClick={() => update({ box: option.id })}
-                >
-                  <span
-                    className="material-swatch"
-                    style={{
-                      background:
-                        option.color ?? 'repeating-linear-gradient(45deg,#fff 0 4px,#dcdce2 4px 6px)',
-                    }}
-                  />
-                  <span className="choice-text">
-                    <span className="choice-name">{option.name}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
           </section>
 
           {/* Price */}

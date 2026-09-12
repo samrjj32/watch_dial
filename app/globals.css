@@ -326,15 +326,7 @@ body {
 .jellylab-royale-builder .active-caption {
   color: var(--selection);
   font-weight: 600;
-}
-.jellylab-royale-builder .preview-mobile-proof {
-  display: none;
-}
-.jellylab-royale-builder .review-star {
-  color: #d69b15;
-}
-
-/* ---------------------------------------------------------- summary */
+}/* ---------------------------------------------------------- summary */
 
 .jellylab-royale-builder .build-summary {
   margin: 23px 4px 0;
@@ -409,39 +401,7 @@ body {
   color: #757080;
   font-size: 15px;
   line-height: 1.65;
-}
-.jellylab-royale-builder .builder-proof {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr 1.2fr;
-  gap: 16px;
-  margin-top: 18px;
-}
-.jellylab-royale-builder .proof-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.jellylab-royale-builder .proof-item + .proof-item {
-  border-left: 1px solid var(--line);
-  padding-left: 16px;
-}
-.jellylab-royale-builder .proof-item strong {
-  font-size: 17px;
-  line-height: 1.25;
-  color: var(--ink);
-  font-weight: 750;
-  white-space: nowrap;
-}
-.jellylab-royale-builder .proof-item > span {
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--muted);
-}
-.jellylab-royale-builder .proof-star {
-  color: var(--mat-blue);
-}
-.jellylab-royale-builder .build-actions {
+}.jellylab-royale-builder .build-actions {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -553,24 +513,7 @@ body {
   font-size: 12px;
   color: #92879f;
   line-height: 1.3;
-}
-.jellylab-royale-builder .box-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.jellylab-royale-builder .box-grid .choice {
-  padding: 10px 8px;
-  gap: 7px;
-  min-height: 58px;
-}
-.jellylab-royale-builder .box-grid .choice-name {
-  font-size: 12px;
-}
-.jellylab-royale-builder .box-grid .material-swatch {
-  width: 25px;
-  height: 25px;
-}
-
-/* ---------------------------------------------------------- windows */
+}/* ---------------------------------------------------------- windows */
 
 .jellylab-royale-builder .window-options {
   display: grid;
@@ -1545,11 +1488,7 @@ body {
   .jellylab-royale-builder .material-swatch {
     width: 27px;
     height: 27px;
-  }
-  .jellylab-royale-builder .box-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .jellylab-royale-builder .build-summary dl {
+  }  .jellylab-royale-builder .build-summary dl {
     font-size: 12px;
     grid-template-columns: 110px minmax(0, 1fr);
   }
@@ -1630,16 +1569,7 @@ body {
   }
   .jellylab-royale-builder .preview-caption .preview-instruction {
     display: none;
-  }
-  .jellylab-royale-builder .preview-mobile-proof {
-    display: inline;
-    color: #6d6379;
-    white-space: nowrap;
-  }
-  .jellylab-royale-builder .preview-review {
-    margin-left: auto;
-  }
-  .jellylab-royale-builder .choice-name {
+  }  .jellylab-royale-builder .choice-name {
     font-size: 14px;
   }
   .jellylab-royale-builder .choice {
@@ -1650,11 +1580,7 @@ body {
   .jellylab-royale-builder .material-swatch {
     width: 32px;
     height: 32px;
-  }
-  .jellylab-royale-builder .box-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .jellylab-royale-builder .topbar {
+  }  .jellylab-royale-builder .topbar {
     height: 66px;
     padding: 0 20px;
     gap: 13px;
@@ -1796,21 +1722,7 @@ body {
     flex-basis: 56px;
     width: 56px;
     height: 56px;
-  }
-  .jellylab-royale-builder .builder-proof {
-    gap: 10px;
-    margin-top: 16px;
-  }
-  .jellylab-royale-builder .proof-item + .proof-item {
-    padding-left: 10px;
-  }
-  .jellylab-royale-builder .proof-item strong {
-    font-size: 14px;
-  }
-  .jellylab-royale-builder .proof-item > span {
-    font-size: 11px;
-  }
-  .jellylab-royale-builder .choice-grid {
+  }  .jellylab-royale-builder .choice-grid {
     gap: 8px;
   }
   .jellylab-royale-builder .case-grid,

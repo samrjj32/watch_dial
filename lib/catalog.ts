@@ -79,13 +79,6 @@ export const STOCK_BAND: Record<string, string> = {
 
 export const stockBandFor = (caseId: string) => STOCK_BAND[caseId] ?? 'rubber-black';
 
-export const BOXES: Option[] = [
-  { id: 'none', name: 'No preference', color: null },
-  { id: 'dark-blue', name: 'Dark blue', color: '#223462' },
-  { id: 'dark-green', name: 'Dark green', color: '#405c32' },
-  { id: 'orange', name: 'Orange', color: '#eb692d' },
-];
-
 export interface Filter {
   id: string;
   name: string;
@@ -344,7 +337,6 @@ export interface Build {
   circleDecal: CircleDecal | null;
   textRemovals: string[];
   engraving: Engraving;
-  box: string;
 }
 
 // Starts on the black watch: the one stock pairing where nothing is an upgrade,
@@ -357,7 +349,6 @@ export const DEFAULT_BUILD: Build = {
   circleDecal: null,
   textRemovals: [],
   engraving: { top: '', bottom: '', font: 'sans' },
-  box: 'none',
 };
 
 export const byId = <T extends { id: string }>(items: T[], id?: string | null) =>
@@ -384,7 +375,6 @@ export function normalizeBuild(input: Partial<Build> = {}): Build {
     circleDecal,
     textRemovals: normalizeTextRemovals(input.textRemovals),
     engraving: normalizeEngraving(input.engraving),
-    box: byId(BOXES, input.box)?.id ?? 'none',
   };
 }
 
@@ -512,7 +502,6 @@ export function buildProperties(input: Partial<Build>): Record<string, string> {
     'Engraving · top': b.engraving.top.trim() || 'None',
     'Engraving · bottom': b.engraving.bottom.trim() || 'None',
     'Engraving · font': hasEngraving(b.engraving) ? engravingFont(b.engraving.font).name : 'None',
-    'Watch box': byId(BOXES, b.box)!.name,
   };
 }
 
