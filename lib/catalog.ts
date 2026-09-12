@@ -48,24 +48,28 @@ export interface Option {
   color?: string | null;
 }
 
+/**
+ * The three stock watches. Each is sold as a complete watch — case and band
+ * together — so the case carries the whole watch's price and its band is not
+ * a separate choice.
+ */
 export const CASES: Option[] = [
-  { id: 'resin-black', name: 'Black', description: 'Resin · included', price: 0, swatch: 'linear-gradient(135deg,#515252,#121314)' },
-  { id: 'resin-silver', name: 'Silver', description: 'Painted resin · included', price: 0, swatch: 'linear-gradient(130deg,#f1f2f2,#a0a5a8)' },
-  { id: 'resin-gold', name: 'Gold', description: 'Resin · included', price: 0, swatch: 'linear-gradient(135deg,#b5a080,#80694b)' },
+  { id: 'resin-black', name: 'Black', description: 'Black rubber strap · included', price: 0, swatch: 'linear-gradient(135deg,#515252,#121314)' },
+  { id: 'resin-silver', name: 'Silver', description: 'Steel bracelet · +$40', price: 4_000, swatch: 'linear-gradient(130deg,#f1f2f2,#a0a5a8)' },
+  { id: 'resin-gold', name: 'Gold', description: 'Brown leather strap · +$35', price: 3_500, swatch: 'linear-gradient(135deg,#b5a080,#80694b)' },
 ];
 
+/** Band artwork and names. The price lives on the case that ships it. */
 export const BANDS: Option[] = [
-  { id: 'rubber-black', name: 'Black rubber', description: 'Stock resin strap · included', price: 0, swatch: 'linear-gradient(135deg,#343434,#171717)' },
-  { id: 'leather-brown', name: 'Brown leather', description: '+$35', price: 3_500, swatch: 'linear-gradient(135deg,#b17942,#73451f)' },
-  { id: 'leather-black', name: 'Black leather', description: '+$35', price: 3_500, swatch: 'linear-gradient(135deg,#4f4844,#211e1c)' },
-  { id: 'steel', name: 'Steel bracelet', description: '+$40', price: 4_000, swatch: 'repeating-linear-gradient(90deg,#b0b7bc 0 5px,#f0f2f3 5px 8px,#899399 8px 11px)' },
+  { id: 'rubber-black', name: 'Black rubber', swatch: 'linear-gradient(135deg,#343434,#171717)' },
+  { id: 'leather-brown', name: 'Brown leather', swatch: 'linear-gradient(135deg,#b17942,#73451f)' },
+  { id: 'leather-black', name: 'Black leather', swatch: 'linear-gradient(135deg,#4f4844,#211e1c)' },
+  { id: 'steel', name: 'Steel bracelet', swatch: 'repeating-linear-gradient(90deg,#b0b7bc 0 5px,#f0f2f3 5px 8px,#899399 8px 11px)' },
 ];
 
 /**
- * The band each case ships with. The three watches are stocked complete —
- * black on rubber, silver on the steel bracelet, gold on brown leather.
- * Choosing a case moves the band to its pairing until the customer picks a
- * band themselves, after which their choice is left alone.
+ * The band each case ships on. Not a choice: the band always follows the case,
+ * here and in `normalizeBuild`, so no saved build or link can separate them.
  */
 export const STOCK_BAND: Record<string, string> = {
   'resin-black': 'rubber-black',
@@ -360,6 +364,7 @@ export const byId = <T extends { id: string }>(items: T[], id?: string | null) =
   items.find((item) => item.id === id);
 
 export function normalizeBuild(input: Partial<Build> = {}): Build {
+  const caseId = byId(CASES, input.case)?.id ?? DEFAULT_BUILD.case;
   const circleDecal = normalizeCircleDecal(input.circleDecal);
   const windows = WINDOWS.map((_, i) =>
     i === 0 && circleDecal ? 'none' : byId(FILTERS, input.windows?.[i])?.id ?? 'none'
@@ -372,8 +377,8 @@ export function normalizeBuild(input: Partial<Build> = {}): Build {
     included.every((id) => id === included[0]);
 
   return {
-    case: byId(CASES, input.case)?.id ?? DEFAULT_BUILD.case,
-    band: byId(BANDS, input.band)?.id ?? DEFAULT_BUILD.band,
+    case: caseId,
+    band: stockBandFor(caseId),
     windows,
     gradientLayout: continuous ? 'continuous' : 'separate',
     circleDecal,
@@ -437,9 +442,14 @@ export interface Pricing {
 
 export function priceBuild(input: Partial<Build>): Pricing {
   const build = normalizeBuild(input);
-  const upgrades: Upgrade[] = [byId(CASES, build.case)!, byId(BANDS, build.band)!]
+  const upgrades: Upgrade[] = [byId(CASES, build.case)!]
     .filter((option) => (option.price ?? 0) > 0)
-    .map((option) => ({ id: option.id, name: option.name, price: option.price! }));
+    .map((option) => ({
+      id: option.id,
+      // The band is part of the watch, so the line item names both.
+      name: `${option.name} case on ${byId(BANDS, stockBandFor(option.id))!.name.toLowerCase()}`,
+      price: option.price!,
+    }));
 
   if (build.textRemovals.length)
     upgrades.push({ id: 'text-removal', name: 'Text removal', price: TEXT_REMOVAL_PRICE });

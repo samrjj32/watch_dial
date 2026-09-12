@@ -14,21 +14,20 @@ design system are ports of that source rather than approximations.
   the circle decal clipped to the aperture. Every aperture path and the decal
   placement (centre 393 × 558.5, 164 px) come from the source, so the hotspots line
   up with the artwork exactly.
-- **Step 1 · Case** — the three stock watches: black, silver and gold resin.
-- **Step 2 · Band** — black rubber, brown or black leather (+$35), steel bracelet
-  (+$40). Black leather is darkened with the renderer's gamma 2.15 curve. Each case
-  ships on a band (black on rubber, silver on steel, gold on brown leather), so
-  choosing a case moves the band there until the customer picks one themselves.
-- **Step 3 · Windows** — four apertures, nine solid filters, six three-stop
+- **Step 1 · Case** — the three stock watches, each sold complete with the band it
+  ships on: black on rubber (included), silver on the steel bracelet (+$40), gold on
+  brown leather (+$35). The band is not a separate choice — `normalizeBuild` derives
+  it from the case, so no stored build or link can separate the two.
+- **Step 2 · Windows** — four apertures, nine solid filters, six three-stop
   gradients, thirteen circle decals with transparent or opaque finishes. A gradient
   can be extended across every window as one continuous sweep.
-- **Step 4 · Text removal** — pick the printed legends (and the analog numbers ring)
+- **Step 3 · Text removal** — pick the printed legends (and the analog numbers ring)
   to remove; $25 per watch regardless of how many.
-- **Step 5 · Laser engraving** — three Liberation faces, two rows of up to 25
+- **Step 4 · Laser engraving** — three Liberation faces, two rows of up to 25
   graphemes, previewed on a caseback render; $25.
-- **Step 6 · Watch box** — colour preference, included.
-- **Pricing** — USD, in cents, from the source catalog: $145 base, upgrades as
-  above, and the $150 free-US-shipping threshold drives the purchase bar.
+- **Step 5 · Watch box** — colour preference, included.
+- **Pricing** — USD, in cents: $145 for the black watch, $180 gold, $185 silver,
+  plus $25 for each finishing service, and the $150 free-US-shipping threshold drives the purchase bar.
 - **Shareable builds** — "Copy link to build" writes the configuration to the URL
   hash; the same state is kept in `sessionStorage` between reloads.
 - **Cart** — a modal drawer with per-item previews, build codes, quantities and a

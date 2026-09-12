@@ -6,7 +6,6 @@ import MiniWatch from './MiniWatch';
 import BackplatePreview from './BackplatePreview';
 import CartDrawer, { type CartItem } from './CartDrawer';
 import {
-  BANDS,
   BOXES,
   CASES,
   DECALS,
@@ -35,7 +34,6 @@ import {
   normalizeBuild,
   normalizeEngravingLine,
   priceBuild,
-  stockBandFor,
   usShippingStatus,
 } from '@/lib/catalog';
 import { ASSETS, CASE_IMAGES, decalImage, isTextAsset } from '@/lib/assets';
@@ -130,12 +128,6 @@ export default function Builder() {
   const windowsSection = useRef<HTMLElement>(null);
   const previewCard = useRef<HTMLDivElement>(null);
   const hydrated = useRef(false);
-  /**
-   * False while the band is still whatever its case brought with it, so
-   * changing the case may move the band too. Set the moment the customer
-   * picks a band, after which their choice outranks the stock pairing.
-   */
-  const bandChosen = useRef(false);
 
   /* -------------------------------------------------- restore a saved build */
   useEffect(() => {
@@ -145,10 +137,7 @@ export default function Builder() {
       const encoded =
         new URLSearchParams(window.location.hash.slice(1)).get('build') ||
         sessionStorage.getItem(STORAGE_KEY);
-      if (encoded && encoded.length < 4000) {
-        setBuild(normalizeBuild(JSON.parse(encoded)));
-        bandChosen.current = true;
-      }
+      if (encoded && encoded.length < 4000) setBuild(normalizeBuild(JSON.parse(encoded)));
     } catch {
       /* a malformed link just starts from the default build */
     }
@@ -175,8 +164,6 @@ export default function Builder() {
     ? build.engraving
     : { ...ENGRAVING_EXAMPLES, font: build.engraving.font };
   const watchLabel = 'Your Casio Royale: ' + Object.values(properties).join(', ');
-  const stockBand = stockBandFor(build.case);
-  const caseName = byId(CASES, build.case)!.name;
 
   const update = useCallback((patch: Partial<Build>) => {
     setBuild((current) => normalizeBuild({ ...current, ...patch }));
@@ -221,24 +208,6 @@ export default function Builder() {
       top: section.getBoundingClientRect().top + window.scrollY - offset,
       behavior: 'smooth',
     });
-  };
-
-  const selectCase = (id: string) => {
-    const stock = stockBandFor(id);
-    if (bandChosen.current || stock === build.band) {
-      update({ case: id });
-      return;
-    }
-    update({ case: id, band: stock });
-    showToast(
-      `Band set to ${byId(BANDS, stock)!.name}, the stock pairing for the ` +
-        `${byId(CASES, id)!.name.toLowerCase()} case. Change it any time.`
-    );
-  };
-
-  const selectBand = (id: string) => {
-    bandChosen.current = true;
-    update({ band: id });
   };
 
   const selectFilter = (id: string) => {
@@ -318,7 +287,6 @@ export default function Builder() {
 
   const startOver = () => {
     setBuild(DEFAULT_BUILD);
-    bandChosen.current = false;
     setActiveWindow(0);
     setExpanded({ removal: false, engraving: false });
     window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -327,7 +295,6 @@ export default function Builder() {
 
   const surpriseMe = () => {
     const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
-    bandChosen.current = true; // the random band is a deliberate one
     const colours = FILTERS.filter((filter) => filter.colors);
     const useDecal = Math.random() < 0.35;
     const decal = pick(DECALS);
@@ -335,7 +302,6 @@ export default function Builder() {
       normalizeBuild({
         ...DEFAULT_BUILD,
         case: pick(CASES).id,
-        band: pick(BANDS).id,
         windows: WINDOWS.map(() => pick(colours).id),
         circleDecal: useDecal ? { id: decal.id, finish: decal.finishes[0] } : null,
       })
@@ -477,7 +443,7 @@ export default function Builder() {
               </h1>
             </div>
             <p>
-              Choose the case, strap, window colours and finishing services. Every Royale is a
+              Choose the watch, its window colours and the finishing services. Every Royale is a
               genuine Casio AE1200 rebuilt by hand.
             </p>
             <div className="builder-proof" aria-label="About JellyLab">
@@ -523,7 +489,7 @@ export default function Builder() {
                   role="radio"
                   aria-checked={build.case === option.id}
                   tabIndex={build.case === option.id ? 0 : -1}
-                  onClick={() => selectCase(option.id)}
+                  onClick={() => update({ case: option.id })}
                 >
                   <span className="material-swatch" style={{ background: option.swatch }} />
                   <span className="choice-text">
@@ -535,43 +501,11 @@ export default function Builder() {
             </div>
           </section>
 
-          {/* 2 · Band */}
-          <section className="option-section" aria-labelledby="band-heading">
-            <div className="section-heading">
-              <h2 id="band-heading">
-                <span className="step">2</span> Band
-              </h2>
-              <span className="selection-label">{byId(BANDS, build.band)!.name}</span>
-            </div>
-            <div className="choice-grid band-grid" role="radiogroup" aria-label="Band material and color">
-              {BANDS.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className="choice"
-                  role="radio"
-                  aria-checked={build.band === option.id}
-                  tabIndex={build.band === option.id ? 0 : -1}
-                  onClick={() => selectBand(option.id)}
-                >
-                  <span className="material-swatch" style={{ background: option.swatch }} />
-                  <span className="choice-text">
-                    <span className="choice-name">{option.name}</span>
-                    <span className="choice-description">{option.description}</span>
-                    {option.id === stockBand && (
-                      <span className="choice-note">Stock with {caseName}</span>
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* 3 · Windows */}
+          {/* 2 · Windows */}
           <section className="option-section" aria-labelledby="window-heading" ref={windowsSection}>
             <div className="section-heading">
               <h2 id="window-heading">
-                <span className="step">3</span> Windows
+                <span className="step">2</span> Windows
               </h2>
               <span className="included-label">Filters &amp; decals included</span>
             </div>
@@ -751,7 +685,7 @@ export default function Builder() {
             </div>
           </section>
 
-          {/* 4 · Text removal */}
+          {/* 3 · Text removal */}
           <section
             className="option-section optional-service"
             data-expanded={expanded.removal}
@@ -759,7 +693,7 @@ export default function Builder() {
           >
             <div className="section-heading">
               <h2 id="removal-heading">
-                <span className="step">4</span> Text removal
+                <span className="step">3</span> Text removal
               </h2>
               <div className="service-heading-actions">
                 <span className="selection-label">
@@ -821,7 +755,7 @@ export default function Builder() {
             )}
           </section>
 
-          {/* 5 · Laser engraving */}
+          {/* 4 · Laser engraving */}
           <section
             className="option-section optional-service engraving-section"
             data-expanded={expanded.engraving}
@@ -829,7 +763,7 @@ export default function Builder() {
           >
             <div className="section-heading">
               <h2 id="engraving-heading">
-                <span className="step">5</span> Laser engraving
+                <span className="step">4</span> Laser engraving
               </h2>
               <div className="service-heading-actions">
                 <span className="selection-label">
@@ -938,11 +872,11 @@ export default function Builder() {
             )}
           </section>
 
-          {/* 6 · Watch box */}
+          {/* 5 · Watch box */}
           <section className="option-section" aria-labelledby="box-heading">
             <div className="section-heading">
               <h2 id="box-heading">
-                <span className="step">6</span> Watch box
+                <span className="step">5</span> Watch box
               </h2>
               <span className="included-label">Included</span>
             </div>

@@ -538,9 +538,6 @@ body {
   box-shadow: inset 0 0 0 2px #ffffff65;
   border-radius: 50%;
 }
-.jellylab-royale-builder .band-grid .material-swatch {
-  border-radius: 8px;
-}
 .jellylab-royale-builder .choice-text {
   min-width: 0;
   display: flex;
@@ -556,13 +553,6 @@ body {
   font-size: 12px;
   color: #92879f;
   line-height: 1.3;
-}
-.jellylab-royale-builder .choice-note {
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--selection);
-  margin-top: 1px;
 }
 .jellylab-royale-builder .box-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1824,7 +1814,6 @@ body {
     gap: 8px;
   }
   .jellylab-royale-builder .case-grid,
-  .jellylab-royale-builder .band-grid,
   .jellylab-royale-builder .box-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
