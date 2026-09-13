@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Custom Casio Royale · Build yours — JellyLab Watches',
+  title: 'Custom Casio Royale · Build yours — ZZZ Culture',
   description:
     'Configure a Casio Royale: pick the watch, a colour or decal for every window, ' +
     'and which printed dial legends to remove.',
-  applicationName: 'JellyLab Royale Builder',
+  applicationName: 'ZZZ Culture Royale Builder',
   openGraph: {
-    title: 'Custom Casio Royale · JellyLab Watches',
+    title: 'Custom Casio Royale · ZZZ Culture',
     description:
       'Configure a Casio Royale: the watch, window colours and decals, and text removal.',
     type: 'website',
@@ -19,7 +19,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#f6f4fa',
+  themeColor: '#1b3ec4',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

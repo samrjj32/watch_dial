@@ -1,5 +1,5 @@
 /**
- * Catalog for the JellyLab Casio Royale builder.
+ * Catalog for the ZZZ Culture Casio Royale builder.
  *
  * Ported from the original storefront modules (jellylab-catalog, -decals,
  * -text-removal). Prices are whole Indian rupees. Window paths, decal
@@ -13,6 +13,8 @@
 export const WINDOW_COLOUR_PRICE = 500;
 /** One colour across all four windows, instead of 4 x WINDOW_COLOUR_PRICE. */
 export const ALL_WINDOWS_PRICE = 1_000;
+/** A circle decal, charged like a window colour. */
+export const DECAL_PRICE = 500;
 export const TEXT_REMOVAL_PRICE = 500;
 
 /* ------------------------------------------------------------------ */
@@ -372,7 +374,8 @@ export interface WindowCharge {
 /**
  * Colouring windows is charged per window, except that one colour across all
  * four is a set price — so filling every aperture the same way costs less than
- * colouring them one at a time. A decal is included and never charged.
+ * colouring them one at a time. A decal takes the circle out of that count and
+ * is charged separately, at the same price as a window.
  */
 export function windowCharge(build: Build): WindowCharge {
   const coloured = build.windows.filter((id) => id !== 'none');
@@ -389,6 +392,9 @@ export function priceBuild(input: Partial<Build>): Pricing {
   const build = normalizeBuild(input);
   const watch = byId(CASES, build.case)!;
   const upgrades: Upgrade[] = [];
+
+  if (build.circleDecal)
+    upgrades.push({ id: 'circle-decal', name: 'Circle decal', price: DECAL_PRICE });
 
   const windows = windowCharge(build);
   if (windows.price > 0)

@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import WatchPreview from './WatchPreview';
 import MiniWatch from './MiniWatch';
+import ZzzMark from './ZzzMark';
 import {
   ALL_WINDOWS_PRICE,
   CASES,
   DECALS,
+  DECAL_PRICE,
   DECAL_FINISHES,
   DEFAULT_BUILD,
   FILTERS,
@@ -29,7 +31,7 @@ import {
 } from '@/lib/catalog';
 import { ASSETS, CASE_IMAGES, decalImage, isTextAsset } from '@/lib/assets';
 
-const STORAGE_KEY = 'jellylab:builder';
+const STORAGE_KEY = 'zzz-culture:builder';
 
 /** Keyboard support for every `role="radiogroup"` in the builder. */
 function handleRadioKeys(event: React.KeyboardEvent<HTMLElement>) {
@@ -298,7 +300,7 @@ export default function Builder() {
     expanded.removal ? 'Done' : build.textRemovals.length > 0 ? 'Edit' : 'Add';
 
   return (
-    <div className="jellylab-royale-builder" ref={root} onKeyDown={handleRadioKeys}>
+    <div className="zzz-royale-builder" ref={root} onKeyDown={handleRadioKeys}>
 
       <div className="builder">
         {/* ------------------------------------------------ preview */}
@@ -325,7 +327,7 @@ export default function Builder() {
                   label={watchLabel}
                 />
                 <span className="preview-logo" aria-hidden>
-                  <Art className="preview-logo-spin" src={ASSETS.logoSpin} size={56} />
+                  <ZzzMark className="preview-logo-mark" />
                 </span>
                 {artwork !== 'ready' && (
                   <div className="image-loading">
@@ -369,9 +371,9 @@ export default function Builder() {
         <div className="controls-column">
           <div className="intro">
             <div className="builder-heading">
-              <Art className="builder-logo" src={ASSETS.logo} size={64} />
+              <ZzzMark className="builder-logo" title="ZZZ Culture" />
               <h1>
-                JellyLab <span>Casio Royale</span> Builder
+                ZZZ Culture <span>Casio Royale</span> Builder
               </h1>
             </div>
             <p>
@@ -478,7 +480,7 @@ export default function Builder() {
             {activeWindow === 0 && (
               <fieldset className="decal-fieldset">
                 <legend>
-                  DECALS <span>Included · Circle only</span>
+                  DECALS <span>{money(DECAL_PRICE)} · Circle only</span>
                 </legend>
                 <div className="decal-options" role="radiogroup" aria-label="Circle decal">
                   <button

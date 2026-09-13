@@ -1,9 +1,10 @@
-# watch_dial — JellyLab Casio Royale Builder (Next.js)
+# watch_dial — ZZZ Culture Casio Royale Builder (Next.js)
 
-A Next.js port of the JellyLab Watches "Custom Casio Royale" builder, rebuilt from
-the original Shopify storefront modules (`jellylab-catalog`, `jellylab-renderer`,
-`jellylab-decals`, `jellylab-text-removal`). Catalog data, prices, aperture geometry
-and the design system are ports of that source rather than approximations.
+A ZZZ Culture Casio Royale builder. It began as a Next.js port of the JellyLab
+Watches storefront page — the renderer, aperture geometry and text-removal
+registration are ports of that source (`jellylab-catalog`, `jellylab-renderer`,
+`jellylab-decals`, `jellylab-text-removal`) rather than approximations — and the
+catalog, prices and branding are now ZZZ Culture's own.
 
 It is the configurator alone: no site chrome, no cart, no checkout. There is no
 header, no fixed purchase bar and no "Add to cart" — the page is meant to sit
@@ -29,8 +30,9 @@ inside a host that provides those.
   to remove; ₹500 per watch regardless of how many.
 - **Pricing** — whole rupees. The watch is the base price; colouring a window is
   ₹500 each, except that one colour across all four is ₹1,000 rather than ₹2,000,
-  so filling every aperture the same way costs less than doing three separately.
-  Decals are included. The breakdown sits at the foot of the controls.
+  so filling every aperture the same way costs less than doing three separately. A
+  circle decal is ₹500 and takes the circle out of the window count. The breakdown
+  sits at the foot of the controls.
 - **Shareable builds** — "Copy link to build" writes the configuration to the URL
   hash; the same state is kept in `sessionStorage` between reloads.
 
@@ -54,10 +56,19 @@ components/
   Builder.tsx       Sections, pricing, keyboard radiogroups, persistence
   WatchPreview.tsx  The composited watch SVG and its aperture hotspots
   MiniWatch.tsx     Window-picker diagram, sharing the renderer's aperture paths
+  ZzzMark.tsx       The ZZZ Culture mark, drawn as SVG paths
 lib/
   catalog.ts        Models, bands, filters, windows, decals, text removal, pricing
   assets.ts         CDN artwork URLs
 ```
+
+## Branding
+
+The ZZZ Culture mark is drawn as SVG paths in `ZzzMark.tsx` — three stepped Zs,
+blue inside a cream keyline inside a black outline, following the embroidered
+patch. It is a stand-in built from the patch photograph, not the artwork itself;
+drop the real file in and swap the component if you have vector art. The palette
+tokens (`--brand`, `--cream`) at the top of `globals.css` carry the patch colours.
 
 ## Notes
 

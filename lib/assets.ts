@@ -9,8 +9,6 @@ const FILES = 'https://cdn.shopify.com/s/files/1/0787/8508/5659/files';
 const THEME = 'https://jellylabwatches.com/cdn/shop/t/9/assets';
 
 export const ASSETS = {
-  logo: `${FILES}/jellylab-builder-logo-r10.webp?v=1788910244`,
-  logoSpin: `${FILES}/jellylab-builder-r10-branding-jellylab-logo-3d.webp?v=1788910345`,
   bandLeather: `${FILES}/jellylab-builder-r10-band-leather.png?v=1788910299`,
   bandSteel: `${FILES}/jellylab-builder-r10-band-steel-v2.webp?v=1788910310`,
   textRemoval: `${FILES}/jellylab-builder-r10-text-removal-patches.webp?v=1788910323`,
